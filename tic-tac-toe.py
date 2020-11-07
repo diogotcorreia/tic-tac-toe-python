@@ -14,3 +14,10 @@ def eh_tabuleiro(tab):
             if type(cell) != int or not(-1 <= cell <= 1):
                 return False
     return True
+
+
+def eh_posicao(pos):
+    # Usar type em vez de isinstance para filtrar boleanos
+    if type(pos) != int:
+        return False
+    return 1 <= pos <= 9
