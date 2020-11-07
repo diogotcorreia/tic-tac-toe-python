@@ -37,6 +37,13 @@ def eh_diagonal(pos):
     return 1 <= pos <= 2
 
 
+def eh_jogador(jogador):
+    # Usar type em vez de isinstance para filtrar boleanos
+    if type(jogador) != int:
+        return False
+    return jogador == -1 or jogador == 1
+
+
 def obter_coluna(tab, col):
     if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(col):
         raise ValueError('obter_coluna: algum dos argumentos e invalido')
@@ -167,3 +174,20 @@ def jogador_ganhador(tab):
             return vencedor
 
     return 0
+
+
+def marcar_posicao(tab, jogador, pos):
+    if not eh_tabuleiro(tab) or not eh_jogador(jogador) or not eh_posicao(pos):
+        raise ValueError('marcar_posicao: algum dos argumentos e invalido')
+
+    posMaquina = pos_humana_maquina(pos)
+
+    if tab[posMaquina[0]][posMaquina[1]] != 0:
+        raise ValueError('marcar_posicao: algum dos argumentos e invalido')
+
+    # TODO more explicit
+    linha = tab[posMaquina[0]]
+    nova_linha = linha[:posMaquina[1]] + \
+        (jogador, ) + linha[posMaquina[1] + 1:]
+
+    return tab[:posMaquina[0]] + (nova_linha, ) + tab[posMaquina[0] + 1:]
