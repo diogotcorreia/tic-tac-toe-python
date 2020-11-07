@@ -65,3 +65,26 @@ def obter_diagonal(tab, diag):
         else:  # diag == 2
             result += (tab[2 - i][i], )
     return result
+
+
+def cell_str(cell):
+    if cell == -1:
+        return 'O'
+    if cell == 1:
+        return 'X'
+    return ' '
+
+
+def tabuleiro_str(tab):
+    if not eh_tabuleiro(tab):
+        raise ValueError('tabuleiro_str: o argumento e invalido')
+
+    result = ''
+    for row in range(3):
+        for col in range(3):
+            result += ' ' + cell_str(tab[row][col]) + ' '
+            if col != 2:
+                result += '|'
+        if row != 2:
+            result += '\n-----------\n'
+    return result
