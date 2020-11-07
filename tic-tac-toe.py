@@ -38,3 +38,10 @@ def obter_coluna(tab, col):
     for i in range(3):
         result += (tab[i][col - 1], )
     return result
+
+
+def obter_linha(tab, row):
+    if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(row):
+        raise ValueError('obter_linha: algum dos argumentos e invalido')
+
+    return tab[row - 1]
