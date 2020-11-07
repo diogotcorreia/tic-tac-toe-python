@@ -30,6 +30,13 @@ def eh_coluna_ou_linha(pos):
     return 1 <= pos <= 3
 
 
+def eh_diagonal(pos):
+    # Usar type em vez de isinstance para filtrar boleanos
+    if type(pos) != int:
+        return False
+    return 1 <= pos <= 2
+
+
 def obter_coluna(tab, col):
     if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(col):
         raise ValueError('obter_coluna: algum dos argumentos e invalido')
@@ -45,3 +52,16 @@ def obter_linha(tab, row):
         raise ValueError('obter_linha: algum dos argumentos e invalido')
 
     return tab[row - 1]
+
+
+def obter_diagonal(tab, diag):
+    if not eh_tabuleiro(tab) or not eh_diagonal(diag):
+        raise ValueError('obter_diagonal: algum dos argumentos e invalido')
+
+    result = ()
+    for i in range(3):
+        if diag == 1:
+            result += (tab[i][i], )
+        else:  # diag == 2
+            result += (tab[2 - i][i], )
+    return result
