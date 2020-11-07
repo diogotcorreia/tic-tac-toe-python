@@ -133,3 +133,37 @@ def obter_posicoes_livres(tab):
             if tab[row][col] == 0:
                 result += (pos_maquina_humana(row, col), )
     return result
+
+
+def eh_tuplo_completo(tup):
+    if not isinstance(tup, tuple) or len(tup) != 3:
+        raise ValueError('eh_tuplo_completo: o argumento e invalido')
+
+    # TODO better checking
+    primeiro_el = tup[0]
+    for i in range(1, 3):
+        if primeiro_el != tup[i]:
+            return 0
+    return primeiro_el
+
+
+def jogador_ganhador(tab):
+    if not eh_tabuleiro(tab):
+        raise ValueError('jogador_ganhador: o argumento e invalido')
+
+    for row in range(3):
+        vencedor = eh_tuplo_completo(obter_linha(tab, row + 1))
+        if vencedor != 0:
+            return vencedor
+
+    for col in range(3):
+        vencedor = eh_tuplo_completo(obter_coluna(tab, col + 1))
+        if vencedor != 0:
+            return vencedor
+
+    for diag in range(2):
+        vencedor = eh_tuplo_completo(obter_diagonal(tab, diag + 1))
+        if vencedor != 0:
+            return vencedor
+
+    return 0
