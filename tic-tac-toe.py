@@ -21,3 +21,20 @@ def eh_posicao(pos):
     if type(pos) != int:
         return False
     return 1 <= pos <= 9
+
+
+def eh_coluna_ou_linha(pos):
+    # Usar type em vez de isinstance para filtrar boleanos
+    if type(pos) != int:
+        return False
+    return 1 <= pos <= 3
+
+
+def obter_coluna(tab, col):
+    if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(col):
+        raise ValueError('obter_coluna: algum dos argumentos e invalido')
+
+    result = ()
+    for i in range(3):
+        result += (tab[i][col - 1], )
+    return result
