@@ -44,6 +44,12 @@ def eh_jogador(jogador):
     return jogador == -1 or jogador == 1
 
 
+def eh_dificuldade(dificuldade):
+    if not isinstance(dificuldade, str):
+        return False
+    return dificuldade == 'basico' or dificuldade == 'normal' or dificuldade == 'perfeito'
+
+
 def obter_coluna(tab, col):
     if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(col):
         raise ValueError('obter_coluna: algum dos argumentos e invalido')
@@ -204,3 +210,51 @@ def escolher_posicao_manual(tab):
             'escolher_posicao_manual: a posicao introduzida e invalida')
 
     return pos
+
+
+def obter_entrada(tab, pos):
+    posMaquina = pos_humana_maquina(pos)
+    return tab[posMaquina[0]][posMaquina[1]]
+
+
+# Estrategias de jogar auto
+
+def escolher_centro(tab, jogador):
+    if tab[1][1] == 0:
+        return 5
+    return 0
+
+
+def escolher_lista(tab, posicoes):
+    for pos in posicoes:
+        if obter_entrada(tab, pos) == 0:
+            return pos
+    return 0
+
+
+def escolher_canto(tab, jogador):
+    cantos = (1, 3, 7, 9)
+    return escolher_lista(tab, cantos)
+
+
+def escolher_lateral(tab, jogador):
+    laterais = (2, 4, 6, 8)
+    return escolher_lista(tab, laterais)
+
+# (Acabar) Estrategias de jogar auto
+
+
+def escolher_posicao_auto(tab, jogador, dificuldade):
+    if not eh_tabuleiro(tab) or not eh_jogador(jogador) or not eh_dificuldade(dificuldade):
+        raise ValueError(
+            'escolher_posicao_auto: algum dos argumentos e invalido')
+
+    if dificuldade == 'basico':
+        estrategias = [escolher_centro, escolher_canto, escolher_lateral]
+
+    for estrategia in estrategias:
+        pos = estrategia(tab, jogador)
+        if pos != 0:
+            return pos
+
+    raise ValueError('escolher_posicao_auto: tabuleiro cheio')
