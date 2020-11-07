@@ -191,3 +191,16 @@ def marcar_posicao(tab, jogador, pos):
         (jogador, ) + linha[posMaquina[1] + 1:]
 
     return tab[:posMaquina[0]] + (nova_linha, ) + tab[posMaquina[0] + 1:]
+
+
+def escolher_posicao_manual(tab):
+    if not eh_tabuleiro(tab):
+        raise ValueError('escolher_posicao_manual: o argumento e invalido')
+
+    pos = eval(input('Turno do jogador. Escolha uma posicao livre: '))
+
+    if not eh_posicao_livre(tab, pos):
+        raise ValueError(
+            'escolher_posicao_manual: a posicao introduzida e invalida')
+
+    return pos
