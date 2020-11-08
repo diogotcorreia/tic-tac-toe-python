@@ -44,6 +44,12 @@ def eh_jogador(jogador):
     return jogador == -1 or jogador == 1
 
 
+def eh_jogador_str(jogador):
+    if not isinstance(jogador, str):
+        return False
+    return jogador == 'X' or jogador == 'O'
+
+
 def eh_dificuldade(dificuldade):
     if not isinstance(dificuldade, str):
         return False
@@ -252,3 +258,42 @@ def escolher_posicao_auto(tab, jogador, dificuldade):
             return pos
 
     raise ValueError('escolher_posicao_auto: tabuleiro cheio')
+
+
+def jogador_str_para_int(jogador):
+    if jogador == 'O':
+        return -1
+    return 1
+
+
+def jogo_do_galo(jogador, dificuldade):
+    if not eh_jogador_str(jogador) or not eh_dificuldade(dificuldade):
+        raise ValueError('jogo_do_galo: algum dos argumentos e invalido')
+
+    print('Bem-vindo ao JOGO DO GALO.')
+    print("O jogador joga com '{}'".format(jogador))
+
+    humano = jogador_str_para_int(jogador)
+    jogador_atual = 1
+
+    tab = ((0, 0, 0), (0, 0, 0), (0, 0, 0))
+
+    while (jogador_ganhador(tab) == 0 and len(obter_posicoes_livres(tab)) > 0):
+        if jogador_atual == humano:
+            pos_escolhida = escolher_posicao_manual(tab)
+        else:
+            pos_escolhida = escolher_posicao_auto(
+                tab, jogador_atual, dificuldade)
+            print('Turno do computador ({}):'.format(dificuldade))
+        tab = marcar_posicao(tab, jogador_atual, pos_escolhida)
+        print(tabuleiro_str(tab))
+
+        # se jogador atual = -1, vai alterar para 1 e vice-versa
+        jogador_atual = -jogador_atual
+
+    ganhador = jogador_ganhador(tab)
+    if ganhador == 1:
+        return 'X'
+    if ganhador == -1:
+        return 'O'
+    return 'EMPATE'
