@@ -164,20 +164,14 @@ def jogador_ganhador(tab):
     if not eh_tabuleiro(tab):
         raise ValueError('jogador_ganhador: o argumento e invalido')
 
-    for row in range(3):
-        vencedor = eh_tuplo_completo(obter_linha(tab, row + 1))
-        if vencedor != 0:
-            return vencedor
-
-    for col in range(3):
-        vencedor = eh_tuplo_completo(obter_coluna(tab, col + 1))
-        if vencedor != 0:
-            return vencedor
-
-    for diag in range(2):
-        vencedor = eh_tuplo_completo(obter_diagonal(tab, diag + 1))
-        if vencedor != 0:
-            return vencedor
+    # verificar todas as possiveis combinacoes: linha, coluna ou diagonal
+    conditions = ((obter_linha, 3), (obter_coluna, 3), (obter_diagonal, 2))
+    for condition in conditions:
+        # i vai ate 3 na linha ou coluna e ate 2 na diagonal
+        for i in range(condition[1]):
+            vencedor = eh_tuplo_completo(condition[0](tab, i + 1))
+            if vencedor != 0:
+                return vencedor
 
     return 0
 
