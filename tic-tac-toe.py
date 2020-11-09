@@ -154,6 +154,19 @@ def obter_posicoes_livres(tab):
     return result
 
 
+def obter_todas_combinacoes(tab):
+    """
+    Obter todas as possiveis combinacoes: linha, coluna ou diagonal
+    """
+    resultado = ()
+    combinacoes = ((obter_linha, 3), (obter_coluna, 3), (obter_diagonal, 2))
+    for combinacao in combinacoes:
+        # i vai ate 3 na linha ou coluna e ate 2 na diagonal
+        for i in range(combinacao[1]):
+            resultado += (combinacao[0](tab, i + 1), )
+    return resultado
+
+
 def eh_tuplo_completo(tup):
     if not isinstance(tup, tuple) or len(tup) != 3:
         raise ValueError('eh_tuplo_completo: o argumento e invalido')
@@ -170,14 +183,10 @@ def jogador_ganhador(tab):
     if not eh_tabuleiro(tab):
         raise ValueError('jogador_ganhador: o argumento e invalido')
 
-    # verificar todas as possiveis combinacoes: linha, coluna ou diagonal
-    conditions = ((obter_linha, 3), (obter_coluna, 3), (obter_diagonal, 2))
-    for condition in conditions:
-        # i vai ate 3 na linha ou coluna e ate 2 na diagonal
-        for i in range(condition[1]):
-            vencedor = eh_tuplo_completo(condition[0](tab, i + 1))
-            if vencedor != 0:
-                return vencedor
+    for combinacao in obter_todas_combinacoes(tab):
+        vencedor = eh_tuplo_completo(combinacao)
+        if vencedor != 0:
+            return vencedor
 
     return 0
 
@@ -217,7 +226,72 @@ def obter_entrada(tab, pos):
     return tab[posMaquina[0]][posMaquina[1]]
 
 
+# Auxiliares estrategias de jogar auto
+
+def escolher_lista(tab, posicoes):
+    """
+    Funcao auxiliar para escolher a primeira posicao vazia de uma lista de posicoes.
+    """
+    for pos in posicoes:
+        if obter_entrada(tab, pos) == 0:
+            return pos
+    return 0
+
+
+def escolher_unico_vazio(tuplo, jogador):
+    """
+    Recebe um tuplo e retorna o indice da unica entrada nula e que nao pertenca ao jogador
+    Se houver mais do que uma entrada nula ou entradas que nao pertencam ao jogador, retorna -1.
+    """
+    ultimo_vazio = -1
+    for entrada in range(len(tuplo)):
+        if tuplo[entrada] == 0:
+            if ultimo_vazio < 0:
+                ultimo_vazio = entrada
+                continue
+            return -1
+        if tuplo[entrada] != jogador:
+            return -1
+    return ultimo_vazio
+
+
 # Estrategias de jogar auto
+
+def escolher_vitoria(tab, jogador):
+    """
+    Edge case: duas posicoes possiveis, retornar a menor de acordo com a fig
+    """
+    possiveis = ()
+    for row in range(3):
+        linha = obter_linha(tab, row + 1)
+        vazio = escolher_unico_vazio(linha, jogador)
+        if vazio != -1:
+            possiveis += (row * 3 + vazio + 1,)
+
+    for col in range(3):
+        coluna = obter_coluna(tab, col + 1)
+        vazio = escolher_unico_vazio(coluna, jogador)
+        if vazio != -1:
+            possiveis += (vazio * 3 + col + 1,)
+
+    for diag in range(2):
+        diagonal = obter_diagonal(tab, diag + 1)
+        vazio = escolher_unico_vazio(diagonal, jogador)
+        if vazio != -1:
+            if diag == 0:
+                possiveis += (pos_maquina_humana(vazio, vazio), )
+            else:  # diag == 1
+                possiveis += (pos_maquina_humana(2 - vazio, vazio), )
+
+    if len(possiveis) == 0:
+        return 0
+    return sorted(possiveis)[0]
+
+
+def escolher_bloqueio(tab, jogador):
+    # escolher_bloqueio eh o escolher_vitoria para o jogador contrario
+    return escolher_vitoria(tab, -jogador)
+
 
 def escolher_centro(tab, jogador):
     if tab[1][1] == 0:
@@ -225,11 +299,21 @@ def escolher_centro(tab, jogador):
     return 0
 
 
-def escolher_lista(tab, posicoes):
-    for pos in posicoes:
-        if obter_entrada(tab, pos) == 0:
-            return pos
-    return 0
+def escolher_canto_oposto(tab, jogador):
+    possiveis = ()
+
+    for diag in range(2):
+        diagonal = obter_diagonal(tab, diag + 1)
+        for canto in (0, 2):
+            if diagonal[canto] == 0 and diagonal[2 - canto] == -jogador:
+                if diag == 0:
+                    possiveis += (pos_maquina_humana(canto, canto), )
+                else:  # diag == 1
+                    possiveis += (pos_maquina_humana(2 - canto, canto), )
+
+    if len(possiveis) == 0:
+        return 0
+    return sorted(possiveis)[0]
 
 
 def escolher_canto(tab, jogador):
@@ -250,7 +334,10 @@ def escolher_posicao_auto(tab, jogador, dificuldade):
             'escolher_posicao_auto: algum dos argumentos e invalido')
 
     if dificuldade == 'basico':
-        estrategias = [escolher_centro, escolher_canto, escolher_lateral]
+        estrategias = (escolher_centro, escolher_canto, escolher_lateral)
+    if dificuldade == 'normal':
+        estrategias = (escolher_vitoria, escolher_bloqueio, escolher_centro,
+                       escolher_canto_oposto, escolher_canto, escolher_lateral)
 
     for estrategia in estrategias:
         pos = estrategia(tab, jogador)
