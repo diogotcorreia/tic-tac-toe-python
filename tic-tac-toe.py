@@ -238,21 +238,69 @@ def escolher_lista(tab, posicoes):
     return 0
 
 
-def escolher_unico_vazio(tuplo, jogador):
+def escolher_vazios(tuplo, jogador):
     """
-    Recebe um tuplo e retorna o indice da unica entrada nula e que nao pertenca ao jogador
-    Se houver mais do que uma entrada nula ou entradas que nao pertencam ao jogador, retorna -1.
+    Recebe um tuplo e retorna um tuplo com o indice de todas as entradas nulas.
+    Se alguma entrada nao nula nao pertercer ao jogador, retorna tuplo vazio.
     """
-    ultimo_vazio = -1
+    vazios = ()
     for entrada in range(len(tuplo)):
         if tuplo[entrada] == 0:
-            if ultimo_vazio < 0:
-                ultimo_vazio = entrada
-                continue
-            return -1
-        if tuplo[entrada] != jogador:
-            return -1
-    return ultimo_vazio
+            vazios += (entrada, )
+        elif tuplo[entrada] != jogador:
+            return ()
+    return vazios
+
+
+def obter_bifurcacoes(tab, pos):
+    bifurcacoes = ()
+
+    # TODO usar row e col para identificar diagonais
+    # posicoes impares teem diagonais
+    if pos % 2 == 1:
+        # posicoes 1, 5 e 9 teem diagonal 1
+        if pos % 4 == 1:
+            bifurcacoes += (obter_diagonal(tab, 1),)
+        # posicoes 3, 5 e 7 teem diagonal 2
+        if pos % 4 == 3 or pos == 5:
+            bifurcacoes += (obter_diagonal(tab, 2),)
+
+    (row, col) = pos_humana_maquina(pos)
+
+    bifurcacoes += (obter_linha(tab, row + 1),)
+    bifurcacoes += (obter_coluna(tab, col + 1),)
+
+    return bifurcacoes
+
+
+def escolher_todas_bifurcacoes(tab, jogador):
+    possiveis = ()
+
+    for pos in range(1, 10):
+        if not eh_posicao_livre(tab, pos):
+            continue
+        biforcacoes = obter_bifurcacoes(tab, pos)
+
+        count = 0
+        for bifurcacao in biforcacoes:
+            if jogador in bifurcacao:
+                count += 1
+
+        if count >= 2:
+            possiveis += (pos, )
+
+    return possiveis
+
+
+def obter_entradas_no_tuplo(entradas, tuplo):
+    """
+    Recebe dois tuplos, retorna os valores de 'entradas' que estao em 'tuplo'.
+    """
+    resultado = ()
+    for entrada in entradas:
+        if entrada in tuplo:
+            resultado += (entrada,)
+    return resultado
 
 
 # Estrategias de jogar auto
@@ -264,24 +312,24 @@ def escolher_vitoria(tab, jogador):
     possiveis = ()
     for row in range(3):
         linha = obter_linha(tab, row + 1)
-        vazio = escolher_unico_vazio(linha, jogador)
-        if vazio != -1:
-            possiveis += (row * 3 + vazio + 1,)
+        vazios = escolher_vazios(linha, jogador)
+        if len(vazios) == 1:
+            possiveis += (row * 3 + vazios[0] + 1,)
 
     for col in range(3):
         coluna = obter_coluna(tab, col + 1)
-        vazio = escolher_unico_vazio(coluna, jogador)
-        if vazio != -1:
-            possiveis += (vazio * 3 + col + 1,)
+        vazios = escolher_vazios(coluna, jogador)
+        if len(vazios) == 1:
+            possiveis += (vazios[0] * 3 + col + 1,)
 
     for diag in range(2):
         diagonal = obter_diagonal(tab, diag + 1)
-        vazio = escolher_unico_vazio(diagonal, jogador)
-        if vazio != -1:
+        vazios = escolher_vazios(diagonal, jogador)
+        if len(vazios) == 1:
             if diag == 0:
-                possiveis += (pos_maquina_humana(vazio, vazio), )
+                possiveis += (pos_maquina_humana(vazios[0], vazios[0]), )
             else:  # diag == 1
-                possiveis += (pos_maquina_humana(2 - vazio, vazio), )
+                possiveis += (pos_maquina_humana(2 - vazios[0], vazios[0]), )
 
     if len(possiveis) == 0:
         return 0
@@ -291,6 +339,74 @@ def escolher_vitoria(tab, jogador):
 def escolher_bloqueio(tab, jogador):
     # escolher_bloqueio eh o escolher_vitoria para o jogador contrario
     return escolher_vitoria(tab, -jogador)
+
+
+def escolher_bifurcacao(tab, jogador):
+    possiveis = escolher_todas_bifurcacoes(tab, jogador)
+
+    if len(possiveis) == 0:
+        return 0
+    return sorted(possiveis)[0]
+
+
+def escolher_bloqueio_bifurcacao(tab, jogador):
+    bifurcacoes = escolher_todas_bifurcacoes(tab, -jogador)
+
+    if len(bifurcacoes) == 0:
+        return 0
+    if len(bifurcacoes) == 1:
+        return bifurcacoes[0]
+
+    possiveis = ()
+
+    for row in range(3):
+        linha = obter_linha(tab, row + 1)
+        vazios = escolher_vazios(linha, jogador)
+        # nunca devera ser 1 porque escolher_vitoria ja verifica isso
+        if len(vazios) == 2:
+            vazios_bifurcacao = obter_entradas_no_tuplo(vazios, bifurcacoes)
+            if len(vazios_bifurcacao) == 0:
+                for vazio in vazios:
+                    possiveis += (row * 3 + vazio + 1,)
+            elif len(vazios_bifurcacao) == 1:
+                possiveis += (row * 3 + vazios_bifurcacao[0] + 1,)
+
+    for col in range(3):
+        coluna = obter_coluna(tab, col + 1)
+        vazios = escolher_vazios(coluna, jogador)
+        # nunca devera ser 1 porque escolher_vitoria ja verifica isso
+        if len(vazios) == 2:
+            vazios_bifurcacao = obter_entradas_no_tuplo(vazios, bifurcacoes)
+            if len(vazios_bifurcacao) == 0:
+                for vazio in vazios:
+                    possiveis += (vazio * 3 + col + 1,)
+            elif len(vazios_bifurcacao) == 1:
+                possiveis += (vazios_bifurcacao[0] * 3 + col + 1,)
+
+    for diag in range(2):
+        diagonal = obter_diagonal(tab, diag + 1)
+        vazios = escolher_vazios(diagonal, jogador)
+        # nunca devera ser 1 porque escolher_vitoria ja verifica isso
+        if len(vazios) == 2:
+            vazios_bifurcacao = obter_entradas_no_tuplo(vazios, bifurcacoes)
+            if len(vazios_bifurcacao) == 0:
+                for vazio in vazios:
+                    if diag == 0:
+                        possiveis += (pos_maquina_humana(vazio, vazio), )
+                    else:  # diag == 1
+                        possiveis += (pos_maquina_humana(2 - vazio, vazio), )
+            elif len(vazios_bifurcacao) == 1:
+                possiveis += (row * 3 + vazios_bifurcacao[0] + 1,)
+                if diag == 0:
+                    possiveis += (pos_maquina_humana(
+                        vazios_bifurcacao[0], vazios_bifurcacao[0]), )
+                else:  # diag == 1
+                    possiveis += (pos_maquina_humana(2 -
+                                                     vazios_bifurcacao[0], vazios_bifurcacao[0]), )
+
+    if len(possiveis) == 0:
+        return 0
+    return sorted(possiveis)[0]
 
 
 def escolher_centro(tab, jogador):
@@ -338,6 +454,9 @@ def escolher_posicao_auto(tab, jogador, dificuldade):
     if dificuldade == 'normal':
         estrategias = (escolher_vitoria, escolher_bloqueio, escolher_centro,
                        escolher_canto_oposto, escolher_canto, escolher_lateral)
+    if dificuldade == 'perfeito':
+        estrategias = (escolher_vitoria, escolher_bloqueio, escolher_bifurcacao, escolher_bloqueio_bifurcacao,
+                       escolher_centro, escolher_canto_oposto, escolher_canto, escolher_lateral)
 
     for estrategia in estrategias:
         pos = estrategia(tab, jogador)
