@@ -480,7 +480,7 @@ def jogo_do_galo(jogador, dificuldade):
         raise ValueError('jogo_do_galo: algum dos argumentos e invalido')
 
     print('Bem-vindo ao JOGO DO GALO.')
-    print("O jogador joga com '{}'".format(jogador))
+    print("O jogador joga com '{}'.".format(jogador))
 
     humano = jogador_str_para_int(jogador)
     jogador_atual = 1
