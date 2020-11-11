@@ -1,8 +1,5 @@
 # Diogo Torres Correia - ist199211
 
-tab = ((1, 0, 0), (-1, 1, 0), (1, -1, -1))
-
-
 def eh_tabuleiro(tab):
     if not isinstance(tab, tuple) or len(tab) != 3:
         return False
@@ -506,6 +503,3 @@ def jogo_do_galo(jogador, dificuldade):
     if ganhador == -1:
         return 'O'
     return 'EMPATE'
-
-
-jogo_do_galo('X', 'perfeito')
