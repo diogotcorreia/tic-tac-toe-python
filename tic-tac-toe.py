@@ -283,7 +283,9 @@ def escolher_todas_bifurcacoes(tab, jogador):
 
         count = 0
         for bifurcacao in biforcacoes:
-            if jogador in bifurcacao:
+            # linha/coluna/diagonal apenas tem uma entrada do 'jogador' e o resto vazio
+            # se tivesse duas entradas, a regra da vitoria impedia de chegar ah bifurcacao
+            if jogador in bifurcacao and -jogador not in bifurcacao:
                 count += 1
 
         if count >= 2:
@@ -503,3 +505,6 @@ def jogo_do_galo(jogador, dificuldade):
     if ganhador == -1:
         return 'O'
     return 'EMPATE'
+
+
+print(escolher_posicao_auto(((0, 0, 0), (1, -1, -1), (0, 0, 1)), 1, 'perfeito'))
