@@ -240,7 +240,7 @@ def escolher_lista(tab, posicoes):
 
 def escolher_vazios(tuplo, jogador):
     """
-    Recebe um tuplo e retorna um tuplo com o indice de todas as entradas nulas.
+    Recebe um tuplo e retorna um tuplo com o indice (0 a n) de todas as entradas nulas.
     Se alguma entrada nao nula nao pertercer ao jogador, retorna tuplo vazio.
     """
     vazios = ()
@@ -359,6 +359,7 @@ def escolher_bloqueio_bifurcacao(tab, jogador):
     if len(bifurcacoes) == 1:
         return bifurcacoes[0]
 
+    bifurcacoes = tuple(x - 1 for x in bifurcacoes)
     possiveis = ()
 
     for row in range(3):
@@ -507,4 +508,4 @@ def jogo_do_galo(jogador, dificuldade):
     return 'EMPATE'
 
 
-print(escolher_posicao_auto(((0, 0, 0), (1, -1, -1), (0, 0, 1)), 1, 'perfeito'))
+jogo_do_galo('X', 'perfeito')
