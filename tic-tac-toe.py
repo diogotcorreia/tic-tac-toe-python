@@ -356,53 +356,43 @@ def escolher_bloqueio_bifurcacao(tab, jogador):
     if len(bifurcacoes) == 1:
         return bifurcacoes[0]
 
-    bifurcacoes = tuple(x - 1 for x in bifurcacoes)
+    #bifurcacoes = tuple(x - 1 for x in bifurcacoes)
     possiveis = ()
 
-    for row in range(3):
-        linha = obter_linha(tab, row + 1)
-        vazios = escolher_vazios(linha, jogador)
-        # nunca devera ser 1 porque escolher_vitoria ja verifica isso
-        if len(vazios) == 2:
-            vazios_bifurcacao = obter_entradas_no_tuplo(vazios, bifurcacoes)
-            if len(vazios_bifurcacao) == 0:
-                for vazio in vazios:
-                    possiveis += (row * 3 + vazio + 1,)
-            elif len(vazios_bifurcacao) == 1:
-                possiveis += (row * 3 + vazios_bifurcacao[0] + 1,)
+    def converter_seccao_relativa_absoluto(seccao, tipo, i):
+        """
+            Recebe uma seccao de indices relativos (0 a 2) e converte
+            para as posicoes absolutas do tabuleiro (1 a 9) consoante
+            se eh linha, coluna ou diagonal
+        """
+        res = ()
+        for el in seccao:
+            if tipo == 'linha':
+                res += (i * 3 + el + 1,)
+            elif tipo == 'coluna':
+                res += (el * 3 + i + 1,)
+            elif tipo == 'diagonal':
+                if i == 0:
+                    res += (pos_maquina_humana(el, el),)
+                # if i == 1
+                else:
+                    res += (pos_maquina_humana(2 - el, el),)
+        return res
 
-    for col in range(3):
-        coluna = obter_coluna(tab, col + 1)
-        vazios = escolher_vazios(coluna, jogador)
-        # nunca devera ser 1 porque escolher_vitoria ja verifica isso
-        if len(vazios) == 2:
-            vazios_bifurcacao = obter_entradas_no_tuplo(vazios, bifurcacoes)
-            if len(vazios_bifurcacao) == 0:
-                for vazio in vazios:
-                    possiveis += (vazio * 3 + col + 1,)
-            elif len(vazios_bifurcacao) == 1:
-                possiveis += (vazios_bifurcacao[0] * 3 + col + 1,)
-
-    for diag in range(2):
-        diagonal = obter_diagonal(tab, diag + 1)
-        vazios = escolher_vazios(diagonal, jogador)
-        # nunca devera ser 1 porque escolher_vitoria ja verifica isso
-        if len(vazios) == 2:
-            vazios_bifurcacao = obter_entradas_no_tuplo(vazios, bifurcacoes)
-            if len(vazios_bifurcacao) == 0:
-                for vazio in vazios:
-                    if diag == 0:
-                        possiveis += (pos_maquina_humana(vazio, vazio), )
-                    else:  # diag == 1
-                        possiveis += (pos_maquina_humana(2 - vazio, vazio), )
-            elif len(vazios_bifurcacao) == 1:
-                possiveis += (row * 3 + vazios_bifurcacao[0] + 1,)
-                if diag == 0:
-                    possiveis += (pos_maquina_humana(
-                        vazios_bifurcacao[0], vazios_bifurcacao[0]), )
-                else:  # diag == 1
-                    possiveis += (pos_maquina_humana(2 -
-                                                     vazios_bifurcacao[0], vazios_bifurcacao[0]), )
+    for tipo, obter_seccao, interacoes in (('linha', obter_linha, 3), ('coluna', obter_coluna, 3), ('diagonal', obter_diagonal, 2)):
+        for i in range(interacoes):
+            seccao = obter_seccao(tab, i + 1)
+            vazios = escolher_vazios(seccao, jogador)
+            vazios = converter_seccao_relativa_absoluto(vazios, tipo, i)
+            if len(vazios) == 2:
+                vazios_bifurcacao = obter_entradas_no_tuplo(
+                    vazios, bifurcacoes)
+                if len(vazios_bifurcacao) == 0:
+                    # qualquer uma das posicoes eh segura
+                    possiveis += vazios
+                elif len(vazios_bifurcacao) == 1:
+                    # apenas uma das posicoes nao dah a vitoria ao oponente
+                    possiveis += vazios_bifurcacao
 
     if len(possiveis) == 0:
         return 0
