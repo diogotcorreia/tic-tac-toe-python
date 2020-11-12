@@ -231,8 +231,8 @@ def escolher_lista(tab, posicoes):
     """
     for pos in posicoes:
         if obter_entrada(tab, pos) == 0:
-            return pos
-    return 0
+            return (pos, )
+    return ()
 
 
 def escolher_vazios(tuplo, jogador):
@@ -247,6 +247,36 @@ def escolher_vazios(tuplo, jogador):
         elif tuplo[entrada] != jogador:
             return ()
     return vazios
+
+
+def converter_pos_relativa_absoluto(pos, tipo, i):
+    """
+        Recebe uma posicao relativa (0 a 2) e converte
+        para a posicao absoluta do tabuleiro (1 a 9) consoante
+        se eh linha, coluna ou diagonal
+    """
+    if tipo == 'linha':
+        return (i * 3 + pos + 1,)
+    elif tipo == 'coluna':
+        return (pos * 3 + i + 1,)
+    elif tipo == 'diagonal':
+        if i == 0:
+            return (pos_maquina_humana(pos, pos),)
+        # if i == 1
+        else:
+            return (pos_maquina_humana(2 - pos, pos),)
+
+
+def converter_seccao_relativa_absoluto(seccao, tipo, i):
+    """
+        Recebe uma seccao de indices relativos (0 a 2) e converte
+        para as posicoes absolutas do tabuleiro (1 a 9) consoante
+        se eh linha, coluna ou diagonal
+    """
+    res = ()
+    for el in seccao:
+        res += converter_pos_relativa_absoluto(el, tipo, i)
+    return res
 
 
 def obter_bifurcacoes(tab, pos):
@@ -270,7 +300,45 @@ def obter_bifurcacoes(tab, pos):
     return bifurcacoes
 
 
-def escolher_todas_bifurcacoes(tab, jogador):
+def obter_entradas_no_tuplo(entradas, tuplo):
+    """
+    Recebe dois tuplos, retorna os valores de 'entradas' que estao em 'tuplo'.
+    """
+    resultado = ()
+    for entrada in entradas:
+        if entrada in tuplo:
+            resultado += (entrada,)
+    return resultado
+
+
+# Estrategias de jogar auto
+
+def escolher_vitoria(tab, jogador):
+    """
+    Edge case: duas posicoes possiveis, retornar a menor de acordo com a fig
+    """
+    possiveis = ()
+
+    seccoes = (('linha', obter_linha, 3), ('coluna', obter_coluna, 3),
+               ('diagonal', obter_diagonal, 2))
+    for tipo, obter_seccao, iteracoes in seccoes:
+        for i in range(iteracoes):
+            seccao = obter_seccao(tab, i + 1)
+            vazios_rel = escolher_vazios(seccao, jogador)
+            vazios_abs = converter_seccao_relativa_absoluto(
+                vazios_rel, tipo, i)
+            if len(vazios_abs) == 1:
+                possiveis += vazios_abs
+
+    return possiveis
+
+
+def escolher_bloqueio(tab, jogador):
+    # escolher_bloqueio eh o escolher_vitoria para o jogador contrario
+    return escolher_vitoria(tab, -jogador)
+
+
+def escolher_bifurcacao(tab, jogador):
     possiveis = ()
 
     for pos in range(1, 10):
@@ -291,118 +359,43 @@ def escolher_todas_bifurcacoes(tab, jogador):
     return possiveis
 
 
-def obter_entradas_no_tuplo(entradas, tuplo):
-    """
-    Recebe dois tuplos, retorna os valores de 'entradas' que estao em 'tuplo'.
-    """
-    resultado = ()
-    for entrada in entradas:
-        if entrada in tuplo:
-            resultado += (entrada,)
-    return resultado
-
-
-# Estrategias de jogar auto
-
-def escolher_vitoria(tab, jogador):
-    """
-    Edge case: duas posicoes possiveis, retornar a menor de acordo com a fig
-    """
-    possiveis = ()
-    for row in range(3):
-        linha = obter_linha(tab, row + 1)
-        vazios = escolher_vazios(linha, jogador)
-        if len(vazios) == 1:
-            possiveis += (row * 3 + vazios[0] + 1,)
-
-    for col in range(3):
-        coluna = obter_coluna(tab, col + 1)
-        vazios = escolher_vazios(coluna, jogador)
-        if len(vazios) == 1:
-            possiveis += (vazios[0] * 3 + col + 1,)
-
-    for diag in range(2):
-        diagonal = obter_diagonal(tab, diag + 1)
-        vazios = escolher_vazios(diagonal, jogador)
-        if len(vazios) == 1:
-            if diag == 0:
-                possiveis += (pos_maquina_humana(vazios[0], vazios[0]), )
-            else:  # diag == 1
-                possiveis += (pos_maquina_humana(2 - vazios[0], vazios[0]), )
-
-    if len(possiveis) == 0:
-        return 0
-    return sorted(possiveis)[0]
-
-
-def escolher_bloqueio(tab, jogador):
-    # escolher_bloqueio eh o escolher_vitoria para o jogador contrario
-    return escolher_vitoria(tab, -jogador)
-
-
-def escolher_bifurcacao(tab, jogador):
-    possiveis = escolher_todas_bifurcacoes(tab, jogador)
-
-    if len(possiveis) == 0:
-        return 0
-    return sorted(possiveis)[0]
-
-
 def escolher_bloqueio_bifurcacao(tab, jogador):
-    bifurcacoes = escolher_todas_bifurcacoes(tab, -jogador)
+    # Obter todas as bifurcacoes
+    bifurcacoes = escolher_bifurcacao(tab, -jogador)
 
-    if len(bifurcacoes) == 0:
-        return 0
-    if len(bifurcacoes) == 1:
-        return bifurcacoes[0]
+    # Se so houver uma bifurcacao, bloquear essa biforcacao
+    # Se nao houver nenhuma, retornar um tuplo vazio, para passar
+    # ah proxima estrategia
+    if len(bifurcacoes) <= 1:
+        return bifurcacoes
 
-    #bifurcacoes = tuple(x - 1 for x in bifurcacoes)
     possiveis = ()
 
-    def converter_seccao_relativa_absoluto(seccao, tipo, i):
-        """
-            Recebe uma seccao de indices relativos (0 a 2) e converte
-            para as posicoes absolutas do tabuleiro (1 a 9) consoante
-            se eh linha, coluna ou diagonal
-        """
-        res = ()
-        for el in seccao:
-            if tipo == 'linha':
-                res += (i * 3 + el + 1,)
-            elif tipo == 'coluna':
-                res += (el * 3 + i + 1,)
-            elif tipo == 'diagonal':
-                if i == 0:
-                    res += (pos_maquina_humana(el, el),)
-                # if i == 1
-                else:
-                    res += (pos_maquina_humana(2 - el, el),)
-        return res
-
-    for tipo, obter_seccao, interacoes in (('linha', obter_linha, 3), ('coluna', obter_coluna, 3), ('diagonal', obter_diagonal, 2)):
-        for i in range(interacoes):
+    seccoes = (('linha', obter_linha, 3), ('coluna', obter_coluna, 3),
+               ('diagonal', obter_diagonal, 2))
+    for tipo, obter_seccao, iteracoes in seccoes:
+        for i in range(iteracoes):
             seccao = obter_seccao(tab, i + 1)
-            vazios = escolher_vazios(seccao, jogador)
-            vazios = converter_seccao_relativa_absoluto(vazios, tipo, i)
-            if len(vazios) == 2:
+            vazios_rel = escolher_vazios(seccao, jogador)
+            vazios_abs = converter_seccao_relativa_absoluto(
+                vazios_rel, tipo, i)
+            if len(vazios_abs) == 2:
                 vazios_bifurcacao = obter_entradas_no_tuplo(
-                    vazios, bifurcacoes)
+                    vazios_abs, bifurcacoes)
                 if len(vazios_bifurcacao) == 0:
                     # qualquer uma das posicoes eh segura
-                    possiveis += vazios
+                    possiveis += vazios_abs
                 elif len(vazios_bifurcacao) == 1:
                     # apenas uma das posicoes nao dah a vitoria ao oponente
                     possiveis += vazios_bifurcacao
 
-    if len(possiveis) == 0:
-        return 0
-    return sorted(possiveis)[0]
+    return possiveis
 
 
 def escolher_centro(tab, jogador):
     if tab[1][1] == 0:
-        return 5
-    return 0
+        return (5,)
+    return ()
 
 
 def escolher_canto_oposto(tab, jogador):
@@ -412,14 +405,10 @@ def escolher_canto_oposto(tab, jogador):
         diagonal = obter_diagonal(tab, diag + 1)
         for canto in (0, 2):
             if diagonal[canto] == 0 and diagonal[2 - canto] == -jogador:
-                if diag == 0:
-                    possiveis += (pos_maquina_humana(canto, canto), )
-                else:  # diag == 1
-                    possiveis += (pos_maquina_humana(2 - canto, canto), )
+                possiveis += converter_pos_relativa_absoluto(
+                    canto, 'diagonal', diag)
 
-    if len(possiveis) == 0:
-        return 0
-    return sorted(possiveis)[0]
+    return possiveis
 
 
 def escolher_canto(tab, jogador):
@@ -450,8 +439,8 @@ def escolher_posicao_auto(tab, jogador, dificuldade):
 
     for estrategia in estrategias:
         pos = estrategia(tab, jogador)
-        if pos != 0:
-            return pos
+        if len(pos) != 0:
+            return sorted(pos)[0]
 
     raise ValueError('escolher_posicao_auto: tabuleiro cheio')
 
