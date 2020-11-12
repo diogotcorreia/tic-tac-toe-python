@@ -211,7 +211,7 @@ def escolher_posicao_manual(tab):
 
     pos = eval(input('Turno do jogador. Escolha uma posicao livre: '))
 
-    if not eh_posicao_livre(tab, pos):
+    if not eh_posicao(pos) or not eh_posicao_livre(tab, pos):
         raise ValueError(
             'escolher_posicao_manual: a posicao introduzida e invalida')
 
