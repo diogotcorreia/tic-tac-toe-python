@@ -1,6 +1,13 @@
 # Diogo Torres Correia - ist199211
 
 def eh_tabuleiro(tab):
+    """
+    Recebe um argumento de qualquer tipo e retorna True ou False,
+    consoante esse argumento corresponda a um tabuleiro, isto eh,
+    se eh um tuplo que contem 3 tuplos que conteem 3 posicoes.
+
+    eh_tabuleiro: universal -> booleano
+    """
     if not isinstance(tab, tuple) or len(tab) != 3:
         return False
     for row in tab:
@@ -14,6 +21,13 @@ def eh_tabuleiro(tab):
 
 
 def eh_posicao(pos):
+    """
+    Recebe um argumento de qualquer tipo e retorna True ou False,
+    consoante esse arugmento corresponda a uma posicao, isto eh,
+    se eh um inteiro entre 1 e 9 (inclusive).
+
+    eh_posicao: universal -> booleano
+    """
     # Usar type em vez de isinstance para filtrar boleanos
     if type(pos) != int:
         return False
@@ -21,6 +35,13 @@ def eh_posicao(pos):
 
 
 def eh_coluna_ou_linha(pos):
+    """
+    Recebe um argumento de qualquer tipo e retorna True ou False,
+    consoante esse argumento corresponda ah posicao de uma linha
+    ou coluna, isto eh, um inteiro entre 1 e 3 (inclusive).
+
+    eh_coluna_ou_linha: universal -> booleano
+    """
     # Usar type em vez de isinstance para filtrar boleanos
     if type(pos) != int:
         return False
@@ -28,6 +49,13 @@ def eh_coluna_ou_linha(pos):
 
 
 def eh_diagonal(pos):
+    """
+    Recebe um argumento de qualquer tipo e retorna True ou False,
+    consoante esse argumento corresponda ah posicao de uma diagonal,
+    isto eh, um inteiro entre 1 e 2 (inclusive).
+
+    eh_diagonal: universal -> booleano
+    """
     # Usar type em vez de isinstance para filtrar boleanos
     if type(pos) != int:
         return False
@@ -35,6 +63,13 @@ def eh_diagonal(pos):
 
 
 def eh_jogador(jogador):
+    """
+    Recebe um argumento de qualquer tipo e retorna True ou False,
+    consoante esse argumento corresponda a um inteiro que representa
+    um jogador, isto é, -1 ou 1.
+
+    eh_jogador: universal -> booleano
+    """
     # Usar type em vez de isinstance para filtrar boleanos
     if type(jogador) != int:
         return False
@@ -42,18 +77,39 @@ def eh_jogador(jogador):
 
 
 def eh_jogador_str(jogador):
+    """
+    Recebe um argumento de qualquer tipo e retorna True ou False,
+    consoante esse argumento corresponda a uma string que representa
+    um jogador, isto é, O ou X.
+
+    eh_jogador_str: universal -> booleano
+    """
     if not isinstance(jogador, str):
         return False
     return jogador == 'X' or jogador == 'O'
 
 
 def eh_dificuldade(dificuldade):
+    """
+    Recebe um argumento de qualquer tipo e retorna True ou False,
+    consoante esse argumento corresponda a uma dificuldade do jogo,
+    isto eh, seja uma string igual a 'basico', 'normal' ou 'perfeito'.
+
+    eh_dificuldade: universal -> booleano
+    """
     if not isinstance(dificuldade, str):
         return False
     return dificuldade == 'basico' or dificuldade == 'normal' or dificuldade == 'perfeito'
 
 
 def obter_coluna(tab, col):
+    """
+    Recebe um tabuleiro e uma posicao (inteiro) de uma coluna, e
+    retorna o vetor que representa essa coluna.
+    Levanta um ValueError caso algum dos arugmentos seja invalido.
+
+    obter_coluna: tabuleiro X inteiro -> vetor
+    """
     if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(col):
         raise ValueError('obter_coluna: algum dos argumentos e invalido')
 
@@ -64,6 +120,13 @@ def obter_coluna(tab, col):
 
 
 def obter_linha(tab, row):
+    """
+    Recebe um tabuleiro e uma posicao (inteiro) de uma linha, e
+    retorna o vetor que representa essa linha.
+    Levanta um ValueError caso algum dos arugmentos seja invalido.
+
+    obter_coluna: tabuleiro X inteiro -> vetor
+    """
     if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(row):
         raise ValueError('obter_linha: algum dos argumentos e invalido')
 
@@ -71,6 +134,13 @@ def obter_linha(tab, row):
 
 
 def obter_diagonal(tab, diag):
+    """
+    Recebe um tabuleiro e uma posicao (inteiro) de uma diagonal, e
+    retorna o vetor que representa essa diagonal.
+    Levanta um ValueError caso algum dos arugmentos seja invalido.
+
+    obter_coluna: tabuleiro X inteiro -> vetor
+    """
     if not eh_tabuleiro(tab) or not eh_diagonal(diag):
         raise ValueError('obter_diagonal: algum dos argumentos e invalido')
 
@@ -84,6 +154,12 @@ def obter_diagonal(tab, diag):
 
 
 def cell_str(cell):
+    """
+    Converte um inteiro que representa um jogador (-1 ou 1)
+    numa string que representa um jogador (O ou X).
+
+    cell_str: inteiro -> string
+    """
     if cell == -1:
         return 'O'
     if cell == 1:
