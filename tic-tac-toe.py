@@ -66,7 +66,7 @@ def eh_jogador(jogador):
     """
     Recebe um argumento de qualquer tipo e retorna True ou False,
     consoante esse argumento corresponda a um inteiro que representa
-    um jogador, isto é, -1 ou 1.
+    um jogador, isto eh, -1 ou 1.
 
     eh_jogador: universal -> booleano
     """
@@ -80,7 +80,7 @@ def eh_jogador_str(jogador):
     """
     Recebe um argumento de qualquer tipo e retorna True ou False,
     consoante esse argumento corresponda a uma string que representa
-    um jogador, isto é, O ou X.
+    um jogador, isto eh, O ou X.
 
     eh_jogador_str: universal -> booleano
     """
