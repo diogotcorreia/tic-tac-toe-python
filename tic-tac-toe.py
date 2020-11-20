@@ -10,12 +10,12 @@ def eh_tabuleiro(tab):
     """
     if not isinstance(tab, tuple) or len(tab) != 3:
         return False
-    for row in tab:
-        if not isinstance(row, tuple) or len(row) != 3:
+    for linha in tab:
+        if not isinstance(linha, tuple) or len(linha) != 3:
             return False
-        for cell in row:
+        for el in linha:
             # Usar type em vez de isinstance para filtrar boleanos
-            if type(cell) != int or not(-1 <= cell <= 1):
+            if type(el) != int or not(-1 <= el <= 1):
                 return False
     return True
 
