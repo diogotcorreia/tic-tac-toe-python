@@ -24,7 +24,8 @@ def eh_inteiro_entre(valor, minimo, maximo):
     """
     Funcao auxiliar que retorna True se o valor for um inteiro
     entre min e max (inclusive)
-    universal X N X N -> booleano
+
+    eh_inteiro_entre: universal X N X N -> booleano
     """
     # Usar type em vez de isinstance para filtrar boleanos
     if type(valor) != int:
@@ -117,24 +118,24 @@ def obter_coluna(tab, col):
     if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(col):
         raise ValueError('obter_coluna: algum dos argumentos e invalido')
 
-    result = ()
+    resultado = ()
     for i in range(3):
-        result += (tab[i][col - 1], )
-    return result
+        resultado += (tab[i][col - 1], )
+    return resultado
 
 
-def obter_linha(tab, row):
+def obter_linha(tab, linha):
     """
     Recebe um tabuleiro e uma posicao (inteiro) de uma linha, e
     retorna o vetor que representa essa linha.
     Levanta um ValueError caso algum dos arugmentos seja invalido.
 
-    obter_coluna: tabuleiro X inteiro -> vetor
+    obter_linha: tabuleiro X inteiro -> vetor
     """
-    if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(row):
+    if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(linha):
         raise ValueError('obter_linha: algum dos argumentos e invalido')
 
-    return tab[row - 1]
+    return tab[linha - 1]
 
 
 def obter_diagonal(tab, diag):
@@ -143,53 +144,62 @@ def obter_diagonal(tab, diag):
     retorna o vetor que representa essa diagonal.
     Levanta um ValueError caso algum dos arugmentos seja invalido.
 
-    obter_coluna: tabuleiro X inteiro -> vetor
+    obter_diagonal: tabuleiro X inteiro -> vetor
     """
     if not eh_tabuleiro(tab) or not eh_diagonal(diag):
         raise ValueError('obter_diagonal: algum dos argumentos e invalido')
 
-    result = ()
+    resultado = ()
     for i in range(3):
         if diag == 1:
-            result += (tab[i][i], )
+            resultado += (tab[i][i], )
         else:  # diag == 2
-            result += (tab[2 - i][i], )
-    return result
-
-
-def cell_str(cell):
-    """
-    Converte um inteiro que representa um jogador (-1 ou 1)
-    numa string que representa um jogador (O ou X).
-
-    cell_str: inteiro -> string
-    """
-    if cell == -1:
-        return 'O'
-    if cell == 1:
-        return 'X'
-    return ' '
+            resultado += (tab[2 - i][i], )
+    return resultado
 
 
 def tabuleiro_str(tab):
+    """
+    Recebe um tabuleiro e retorna a cadeia de caracteres que o
+    representa graficamente
+
+    tabuleiro_str: tabuleiro -> cad. caracteres
+    """
+
+    def jogador_str(jogador):
+        """
+        Converte um inteiro que representa um jogador (-1 ou 1)
+        numa string que representa um jogador (O ou X).
+        O vazio (0), vai ser representado por um espaco.
+
+        cell_str: jogador -> string
+        """
+        if jogador == -1:
+            return 'O'
+        if jogador == 1:
+            return 'X'
+        return ' '
+
     if not eh_tabuleiro(tab):
         raise ValueError('tabuleiro_str: o argumento e invalido')
 
-    result = ''
-    for row in range(3):
+    resultado = ''
+    for linha in range(3):
         for col in range(3):
-            result += ' ' + cell_str(tab[row][col]) + ' '
-            if col != 2:
-                result += '|'
-        if row != 2:
-            result += '\n-----------\n'
-    return result
+            resultado += ' ' + jogador_str(tab[linha][col]) + ' '
+            if col != 2:  # Adiciona separador exceto na ultima coluna
+                resultado += '|'
+        if linha != 2:  # Adiciona separador exceto na ultima linha
+            resultado += '\n-----------\n'
+    return resultado
 
 
 def pos_humana_maquina(pos):
     """
-    Converte uma posicao humana (e.g. 1, 4, 9) numa posicao
-    maquina (e.g. (0,0), (1, 0), (2, 2))
+    Funcao auxiliar que converte uma posicao humana (e.g. 1, 4, 9)
+    numa posicao maquina (e.g. (0,0), (1, 0), (2, 2))
+
+    pos_humana_maquina: posicao -> tuplo
     """
     if not eh_posicao(pos):
         raise ValueError('pos_humana_maquina: o argumento e invalido')
@@ -198,42 +208,61 @@ def pos_humana_maquina(pos):
     return (pos // 3, pos % 3)
 
 
-def pos_maquina_humana(row, col):
+def pos_maquina_humana(linha, col):
     """
-    Converte uma posicao maquina (e.g. (0,0), (1, 0), (2, 2))
-    numa posicao humana (e.g. 1, 4, 9)
+    Funcao auxiliar que converte uma posicao maquina
+    (e.g. (0,0), (1, 0), (2, 2)) numa posicao humana (e.g. 1, 4, 9).
+    As linhas e as colunas sao contadas a partir de zero.
+
+    pos_maquina_humana: linha X coluna -> posicao
     """
-    # TODO improve checking
-    if not eh_coluna_ou_linha(row + 1) or not eh_coluna_ou_linha(col + 1):
+    if not type(linha) == int or \
+            not type(col) == int or \
+            not eh_coluna_ou_linha(linha + 1) or \
+            not eh_coluna_ou_linha(col + 1):
         raise ValueError('pos_maquina_humana: algum dos argumentos e invalido')
 
-    return row * 3 + col + 1
+    return linha * 3 + col + 1
 
 
 def eh_posicao_livre(tab, pos):
+    """
+    Recebe um tabuleiro e uma posicao e devolve True se a posicao
+    correspondente no tabuleiro estiver livre.
+    Devolve False caso contrario.
+
+    eh_posicao_livre: tabuleiro X posicao -> booleano
+    """
     if not eh_tabuleiro(tab) or not eh_posicao(pos):
         raise ValueError('eh_posicao_livre: algum dos argumentos e invalido')
 
-    posMaquina = pos_humana_maquina(pos)
-    return tab[posMaquina[0]][posMaquina[1]] == 0
+    linha, coluna = pos_humana_maquina(pos)
+    return tab[linha][coluna] == 0
 
 
 def obter_posicoes_livres(tab):
+    """
+    Recebe um tabuleiro e devolve o vetor ordenado com todas as posicoes
+    livres do tabuleiro.
+
+    obter_posicoes_livres: tabuleiro -> vetor
+    """
     if not eh_tabuleiro(tab):
         raise ValueError('obter_posicoes_livres: o argumento e invalido')
 
-    # TODO: consider using eh_posicao_livre
-    result = ()
-    for row in range(3):
-        for col in range(3):
-            if tab[row][col] == 0:
-                result += (pos_maquina_humana(row, col), )
-    return result
+    resultado = ()
+    for pos in range(1, 10):
+        if eh_posicao_livre(tab, pos):
+            resultado += (pos, )
+    return resultado
 
 
 def obter_todas_combinacoes(tab):
     """
-    Obter todas as possiveis combinacoes: linha, coluna ou diagonal
+    Retorna um tuplo que contem todas as possiveis combinacoes de linhas,
+    colunas ou diagonais.
+
+    obter_todas_combinacoes: tabuleiro -> tuplo de tuplos
     """
     resultado = ()
     combinacoes = ((obter_linha, 3), (obter_coluna, 3), (obter_diagonal, 2))
@@ -307,7 +336,8 @@ def obter_entrada(tab, pos):
 
 def escolher_lista(tab, posicoes):
     """
-    Funcao auxiliar para escolher a primeira posicao vazia de uma lista de posicoes.
+    Funcao auxiliar para escolher a primeira posicao vazia
+    de uma lista de posicoes.
     """
     for pos in posicoes:
         if obter_entrada(tab, pos) == 0:
@@ -317,7 +347,8 @@ def escolher_lista(tab, posicoes):
 
 def escolher_vazios(tuplo, jogador):
     """
-    Recebe um tuplo e retorna um tuplo com o indice (0 a n) de todas as entradas nulas.
+    Recebe um tuplo e retorna um tuplo com o indice (0 a n) de
+    todas as entradas nulas.
     Se alguma entrada nao nula nao pertercer ao jogador, retorna tuplo vazio.
     """
     vazios = ()
@@ -428,8 +459,10 @@ def escolher_bifurcacao(tab, jogador):
 
         count = 0
         for bifurcacao in biforcacoes:
-            # linha/coluna/diagonal apenas tem uma entrada do 'jogador' e o resto vazio
-            # se tivesse duas entradas, a regra da vitoria impedia de chegar ah bifurcacao
+            # linha/coluna/diagonal apenas tem uma entrada do 'jogador'
+            # e o resto vazio.
+            # se tivesse duas entradas, a regra da vitoria impedia de chegar
+            # ah bifurcacao
             if jogador in bifurcacao and -jogador not in bifurcacao:
                 count += 1
 
