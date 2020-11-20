@@ -178,15 +178,11 @@ def tabuleiro_str(tab):
     if not eh_tabuleiro(tab):
         raise ValueError('tabuleiro_str: o argumento e invalido')
 
-    resultado = ''
-    for linha in range(3):
-        for col in range(3):
-            resultado += ' ' + jogador_str(tab[linha][col]) + ' '
-            if col != 2:  # Adiciona separador exceto na ultima coluna
-                resultado += '|'
-        if linha != 2:  # Adiciona separador exceto na ultima linha
-            resultado += '\n-----------\n'
-    return resultado
+    return '\n-----------\n'.join([
+        '|'.join([
+            ' ' + jogador_str(tab[linha][col]) + ' '
+            for col in range(3)])
+        for linha in range(3)])
 
 
 def pos_humana_maquina(pos):
