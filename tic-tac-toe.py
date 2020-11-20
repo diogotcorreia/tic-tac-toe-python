@@ -158,6 +158,21 @@ def obter_diagonal(tab, diag):
     return resultado
 
 
+def jogador_str(jogador):
+    """
+    Converte um inteiro que representa um jogador (-1 ou 1)
+    numa string que representa um jogador (O ou X).
+    O vazio (0), vai ser representado por um espaco.
+
+    cell_str: jogador -> string
+    """
+    if jogador == -1:
+        return 'O'
+    if jogador == 1:
+        return 'X'
+    return ' '
+
+
 def tabuleiro_str(tab):
     """
     Recebe um tabuleiro e retorna a cadeia de caracteres que o
@@ -165,20 +180,6 @@ def tabuleiro_str(tab):
 
     tabuleiro_str: tabuleiro -> cad. caracteres
     """
-
-    def jogador_str(jogador):
-        """
-        Converte um inteiro que representa um jogador (-1 ou 1)
-        numa string que representa um jogador (O ou X).
-        O vazio (0), vai ser representado por um espaco.
-
-        cell_str: jogador -> string
-        """
-        if jogador == -1:
-            return 'O'
-        if jogador == 1:
-            return 'X'
-        return ' '
 
     if not eh_tabuleiro(tab):
         raise ValueError('tabuleiro_str: o argumento e invalido')
@@ -567,13 +568,13 @@ def escolher_posicao_auto(tab, jogador, dificuldade):
     raise ValueError('escolher_posicao_auto: tabuleiro cheio')
 
 
-def jogador_str_para_int(jogador):
-    if jogador == 'O':
-        return -1
-    return 1
-
-
 def jogo_do_galo(jogador, dificuldade):
+
+    def jogador_str_para_int(jogador):
+        if jogador == 'O':
+            return -1
+        return 1
+
     if not eh_jogador_str(jogador) or not eh_dificuldade(dificuldade):
         raise ValueError('jogo_do_galo: algum dos argumentos e invalido')
 
@@ -599,8 +600,6 @@ def jogo_do_galo(jogador, dificuldade):
         jogador_atual = -jogador_atual
 
     ganhador = jogador_ganhador(tab)
-    if ganhador == 1:
-        return 'X'
-    if ganhador == -1:
-        return 'O'
-    return 'EMPATE'
+    if ganhador == 0:
+        return 'EMPATE'
+    return jogador_str(ganhador)
