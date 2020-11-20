@@ -77,7 +77,7 @@ def eh_jogador(jogador):
 
     eh_jogador: universal -> booleano
     """
-    # zero não é um jogador válido
+    # zero nao eh um jogador valido
     return eh_inteiro_entre(jogador, -1, 1) and jogador != 0
 
 
