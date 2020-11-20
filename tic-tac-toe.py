@@ -257,40 +257,49 @@ def obter_posicoes_livres(tab):
     return resultado
 
 
-def obter_todas_combinacoes(tab):
-    """
-    Retorna um tuplo que contem todas as possiveis combinacoes de linhas,
-    colunas ou diagonais.
-
-    obter_todas_combinacoes: tabuleiro -> tuplo de tuplos
-    """
-    resultado = ()
-    combinacoes = ((obter_linha, 3), (obter_coluna, 3), (obter_diagonal, 2))
-    for combinacao in combinacoes:
-        # i vai ate 3 na linha ou coluna e ate 2 na diagonal
-        for i in range(combinacao[1]):
-            resultado += (combinacao[0](tab, i + 1), )
-    return resultado
-
-
-def eh_tuplo_completo(tup):
-    if not isinstance(tup, tuple) or len(tup) != 3:
-        raise ValueError('eh_tuplo_completo: o argumento e invalido')
-
-    # TODO better checking
-    primeiro_el = tup[0]
-    for i in range(1, 3):
-        if primeiro_el != tup[i]:
-            return 0
-    return primeiro_el
-
-
 def jogador_ganhador(tab):
+    """
+    Recebe um tabuleiro e retorna o jogador vencedor (-1 ou 1).
+    Se nao houver nenhum jogador que ganhou, retorna zero.
+
+    jogador_ganhador: tabuleiro -> inteiro
+    """
+    def obter_todas_seccoes(tab):
+        """
+        Recebe um tabuleiro e retorna um tuplo que contem todas as
+        possiveis seccoes de linhas, colunas ou diagonais.
+
+        obter_todas_seccoes: tabuleiro -> tuplo de tuplos
+        """
+        resultado = ()
+        seccoes = ((obter_linha, 3),
+                   (obter_coluna, 3),
+                   (obter_diagonal, 2))
+        for seccao in seccoes:
+            # i vai ate 3 na linha ou coluna e ate 2 na diagonal
+            for i in range(seccao[1]):
+                resultado += (seccao[0](tab, i + 1), )
+        return resultado
+
+    def eh_tuplo_completo(tup):
+        """
+        Recebe uma linha/coluna/diagonal e retorna True se todos os valores
+        do tuplo forem iguais.
+
+        eh_tuplo_completo: linha/coluna/diagonal -> booleano
+        """
+        if not isinstance(tup, tuple) or len(tup) != 3:
+            raise ValueError('eh_tuplo_completo: o argumento e invalido')
+
+        if tup[0] == tup[1] == tup[2]:
+            return tup[0]
+        return 0
+
     if not eh_tabuleiro(tab):
         raise ValueError('jogador_ganhador: o argumento e invalido')
 
-    for combinacao in obter_todas_combinacoes(tab):
-        vencedor = eh_tuplo_completo(combinacao)
+    for seccao in obter_todas_seccoes(tab):
+        vencedor = eh_tuplo_completo(seccao)
         if vencedor != 0:
             return vencedor
 
