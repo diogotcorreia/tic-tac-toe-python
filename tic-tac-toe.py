@@ -118,10 +118,7 @@ def obter_coluna(tab, col):
     if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(col):
         raise ValueError('obter_coluna: algum dos argumentos e invalido')
 
-    resultado = ()
-    for i in range(3):
-        resultado += (tab[i][col - 1], )
-    return resultado
+    return tuple(linha[col - 1] for linha in tab)
 
 
 def obter_linha(tab, linha):
@@ -149,13 +146,10 @@ def obter_diagonal(tab, diag):
     if not eh_tabuleiro(tab) or not eh_diagonal(diag):
         raise ValueError('obter_diagonal: algum dos argumentos e invalido')
 
-    resultado = ()
-    for i in range(3):
-        if diag == 1:
-            resultado += (tab[i][i], )
-        else:  # diag == 2
-            resultado += (tab[2 - i][i], )
-    return resultado
+    if diag == 1:
+        return tuple(tab[i][i] for i in range(3))
+    # diag == 2
+    return tuple(tab[2 - i][i] for i in range(3))
 
 
 def jogador_str(jogador):
@@ -251,11 +245,7 @@ def obter_posicoes_livres(tab):
     if not eh_tabuleiro(tab):
         raise ValueError('obter_posicoes_livres: o argumento e invalido')
 
-    resultado = ()
-    for pos in range(1, 10):
-        if eh_posicao_livre(tab, pos):
-            resultado += (pos, )
-    return resultado
+    return tuple(pos for pos in range(1, 10) if eh_posicao_livre(tab, pos))
 
 
 def jogador_ganhador(tab):
@@ -265,6 +255,7 @@ def jogador_ganhador(tab):
 
     jogador_ganhador: tabuleiro -> inteiro
     """
+
     def obter_todas_seccoes(tab):
         """
         Recebe um tabuleiro e retorna um tuplo que contem todas as
@@ -272,15 +263,15 @@ def jogador_ganhador(tab):
 
         obter_todas_seccoes: tabuleiro -> tuplo de tuplos
         """
-        resultado = ()
         seccoes = ((obter_linha, 3),
                    (obter_coluna, 3),
                    (obter_diagonal, 2))
-        for seccao in seccoes:
-            # i vai ate 3 na linha ou coluna e ate 2 na diagonal
-            for i in range(seccao[1]):
-                resultado += (seccao[0](tab, i + 1), )
-        return resultado
+
+        # i vai ate 3 na linha ou coluna e ate 2 na diagonal
+        # executa a funcao adequada dependendo se eh linha, coluna ou diag
+        return tuple(seccao[0](tab, i + 1)
+                     for seccao in seccoes
+                     for i in range(seccao[1]))
 
     def eh_tuplo_completo(tup):
         """
