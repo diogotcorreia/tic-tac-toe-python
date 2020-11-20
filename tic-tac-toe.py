@@ -20,6 +20,18 @@ def eh_tabuleiro(tab):
     return True
 
 
+def eh_inteiro_entre(valor, minimo, maximo):
+    """
+    Funcao auxiliar que retorna True se o valor for um inteiro
+    entre min e max (inclusive)
+    universal X N X N -> booleano
+    """
+    # Usar type em vez de isinstance para filtrar boleanos
+    if type(valor) != int:
+        return False
+    return minimo <= valor <= maximo
+
+
 def eh_posicao(pos):
     """
     Recebe um argumento de qualquer tipo e retorna True ou False,
@@ -29,9 +41,7 @@ def eh_posicao(pos):
     eh_posicao: universal -> booleano
     """
     # Usar type em vez de isinstance para filtrar boleanos
-    if type(pos) != int:
-        return False
-    return 1 <= pos <= 9
+    return eh_inteiro_entre(pos, 1, 9)
 
 
 def eh_coluna_ou_linha(pos):
@@ -43,9 +53,7 @@ def eh_coluna_ou_linha(pos):
     eh_coluna_ou_linha: universal -> booleano
     """
     # Usar type em vez de isinstance para filtrar boleanos
-    if type(pos) != int:
-        return False
-    return 1 <= pos <= 3
+    return eh_inteiro_entre(pos, 1, 3)
 
 
 def eh_diagonal(pos):
@@ -57,9 +65,7 @@ def eh_diagonal(pos):
     eh_diagonal: universal -> booleano
     """
     # Usar type em vez de isinstance para filtrar boleanos
-    if type(pos) != int:
-        return False
-    return 1 <= pos <= 2
+    return eh_inteiro_entre(pos, 1, 2)
 
 
 def eh_jogador(jogador):
@@ -70,10 +76,8 @@ def eh_jogador(jogador):
 
     eh_jogador: universal -> booleano
     """
-    # Usar type em vez de isinstance para filtrar boleanos
-    if type(jogador) != int:
-        return False
-    return jogador == -1 or jogador == 1
+    # zero não é um jogador válido
+    return eh_inteiro_entre(jogador, -1, 1) and jogador != 0
 
 
 def eh_jogador_str(jogador):
@@ -86,7 +90,7 @@ def eh_jogador_str(jogador):
     """
     if not isinstance(jogador, str):
         return False
-    return jogador == 'X' or jogador == 'O'
+    return jogador in ('X', 'O')
 
 
 def eh_dificuldade(dificuldade):
@@ -99,7 +103,7 @@ def eh_dificuldade(dificuldade):
     """
     if not isinstance(dificuldade, str):
         return False
-    return dificuldade == 'basico' or dificuldade == 'normal' or dificuldade == 'perfeito'
+    return dificuldade in ('basico', 'normal', 'perfeito')
 
 
 def obter_coluna(tab, col):
