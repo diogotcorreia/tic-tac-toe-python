@@ -295,23 +295,35 @@ def jogador_ganhador(tab):
 
 
 def marcar_posicao(tab, jogador, pos):
+    """
+    Recebe um tabuleiro, um inteiro identificando um jogador e uma posicao
+    livre, e devolve um novo tabuleiro modificado com uma nova marca
+    do jogador nessa posicao.
+
+    marcar_posicao: tabuleiro X jogador X posicao -> tabuleiro
+    """
+
     if not eh_tabuleiro(tab) or not eh_jogador(jogador) or not eh_posicao(pos):
         raise ValueError('marcar_posicao: algum dos argumentos e invalido')
 
-    posMaquina = pos_humana_maquina(pos)
+    linha, coluna = pos_humana_maquina(pos)
 
-    if tab[posMaquina[0]][posMaquina[1]] != 0:
+    if tab[linha][coluna] != 0:
         raise ValueError('marcar_posicao: algum dos argumentos e invalido')
 
-    # TODO more explicit
-    linha = tab[posMaquina[0]]
-    nova_linha = linha[:posMaquina[1]] + \
-        (jogador, ) + linha[posMaquina[1] + 1:]
+    linha_tuplo = tab[linha]
+    nova_linha = linha_tuplo[:coluna] + (jogador, ) + linha_tuplo[coluna + 1:]
 
-    return tab[:posMaquina[0]] + (nova_linha, ) + tab[posMaquina[0] + 1:]
+    return tab[:linha] + (nova_linha, ) + tab[linha + 1:]
 
 
 def escolher_posicao_manual(tab):
+    """
+    Recebe um tabuleiro e realiza a leitura de uma posicao introduzida
+    manualmente por um jogador e devolve esta posicao escolhida.
+
+    escolher_posicao_manual: tabuleiro -> posicao
+    """
     if not eh_tabuleiro(tab):
         raise ValueError('escolher_posicao_manual: o argumento e invalido')
 
@@ -324,18 +336,27 @@ def escolher_posicao_manual(tab):
     return pos
 
 
-def obter_entrada(tab, pos):
-    posMaquina = pos_humana_maquina(pos)
-    return tab[posMaquina[0]][posMaquina[1]]
-
-
 # Auxiliares estrategias de jogar auto
 
 def escolher_lista(tab, posicoes):
     """
-    Funcao auxiliar para escolher a primeira posicao vazia
-    de uma lista de posicoes.
+    Funcao auxiliar que recebe um tabuleiro e um tuplo de posicoes
+    e retorna um tuplo que contem apenas a primeira posicao vazia
+    que estah nessa lista.
+
+    escolher_lista: tabuleiro X tuplo posicoes -> tuplo posicao
     """
+
+    def obter_entrada(tab, pos):
+        """
+        Funcao auxiliar que recebe um tabuleiro e uma posicao e retorna
+        o valor da entrada do tabuleiro nessa posicao.
+
+        obter_entrada: tabuleiro X posicao -> inteiro
+        """
+        linha, coluna = pos_humana_maquina(pos)
+        return tab[linha][coluna]
+
     for pos in posicoes:
         if obter_entrada(tab, pos) == 0:
             return (pos, )
@@ -345,9 +366,12 @@ def escolher_lista(tab, posicoes):
 def escolher_vazios(tuplo, jogador):
     """
     Recebe um tuplo e retorna um tuplo com o indice (0 a n) de
-    todas as entradas nulas.
+    todas as entradas nulas no tuplo original.
     Se alguma entrada nao nula nao pertercer ao jogador, retorna tuplo vazio.
+
+    escolher_vazios: tuplo X jogador -> tuplo
     """
+
     vazios = ()
     for entrada in range(len(tuplo)):
         if tuplo[entrada] == 0:
@@ -359,64 +383,48 @@ def escolher_vazios(tuplo, jogador):
 
 def converter_pos_relativa_absoluto(pos, tipo, i):
     """
-        Recebe uma posicao relativa (0 a 2) e converte
-        para a posicao absoluta do tabuleiro (1 a 9) consoante
-        se eh linha, coluna ou diagonal
+    Recebe uma posicao relativa (0 a 2) e converte-a
+    para a posicao absoluta do tabuleiro (1 a 9) consoante
+    se eh linha, coluna ou diagonal
+
+    converter_pos_relativa_absoluto:
+        posicao relativa X cad. caracteres X inteiro -> posicao absoluta
     """
+
     if tipo == 'linha':
-        return (i * 3 + pos + 1,)
+        return pos_maquina_humana(i, pos)
     elif tipo == 'coluna':
-        return (pos * 3 + i + 1,)
+        return pos_maquina_humana(pos, i)
     elif tipo == 'diagonal':
         if i == 0:
-            return (pos_maquina_humana(pos, pos),)
+            return pos_maquina_humana(pos, pos)
         # if i == 1
         else:
-            return (pos_maquina_humana(2 - pos, pos),)
+            return pos_maquina_humana(2 - pos, pos)
 
 
 def converter_seccao_relativa_absoluto(seccao, tipo, i):
     """
-        Recebe uma seccao de indices relativos (0 a 2) e converte
-        para as posicoes absolutas do tabuleiro (1 a 9) consoante
-        se eh linha, coluna ou diagonal
+    Recebe uma seccao de indices relativos (0 a 2) e converte
+    para as posicoes absolutas do tabuleiro (1 a 9) consoante
+    se eh linha, coluna ou diagonal
+
+    converter_seccao_relativa_absoluto:
+        tuplo X cad. caracteres X inteiro -> tuplo
     """
-    res = ()
-    for el in seccao:
-        res += converter_pos_relativa_absoluto(el, tipo, i)
-    return res
 
-
-def obter_bifurcacoes(tab, pos):
-    bifurcacoes = ()
-
-    # TODO usar row e col para identificar diagonais
-    # posicoes impares teem diagonais
-    if pos % 2 == 1:
-        # posicoes 1, 5 e 9 teem diagonal 1
-        if pos % 4 == 1:
-            bifurcacoes += (obter_diagonal(tab, 1),)
-        # posicoes 3, 5 e 7 teem diagonal 2
-        if pos % 4 == 3 or pos == 5:
-            bifurcacoes += (obter_diagonal(tab, 2),)
-
-    (row, col) = pos_humana_maquina(pos)
-
-    bifurcacoes += (obter_linha(tab, row + 1),)
-    bifurcacoes += (obter_coluna(tab, col + 1),)
-
-    return bifurcacoes
+    return tuple(converter_pos_relativa_absoluto(el, tipo, i) for el in seccao)
 
 
 def obter_entradas_no_tuplo(entradas, tuplo):
     """
     Recebe dois tuplos, retorna os valores de 'entradas' que estao em 'tuplo'.
+    Por outras palavras, faz a intersecao entre os dois tuplos.
+
+    obter_entradas_no_tuplo: tuplo X tuplo -> tuplo
     """
-    resultado = ()
-    for entrada in entradas:
-        if entrada in tuplo:
-            resultado += (entrada,)
-    return resultado
+
+    return tuple(el for el in entradas if el in tuplo)
 
 
 # Estrategias de jogar auto
@@ -447,15 +455,38 @@ def escolher_bloqueio(tab, jogador):
 
 
 def escolher_bifurcacao(tab, jogador):
+    def obter_bifurcacoes(tab, pos):
+        """
+        Recebe um tabuleiro e uma posicao, e retorna todas as bifurcacoes
+        nessa posicao, quer sejam linhas, colunas ou diagonais.
+
+        obter_bifurcacoes: tabuleiro X posicao -> tuplo de seccoes
+        """
+        bifurcacoes = ()
+
+        (row, col) = pos_humana_maquina(pos)
+
+        # diagonal 1 (posicoes 1, 5 e 9)
+        if row == col:
+            bifurcacoes += (obter_diagonal(tab, 1),)
+        # diagonal 2 (posicoes 3, 5 e 7)
+        elif abs(2 - row) == col:
+            bifurcacoes += (obter_diagonal(tab, 2), )
+
+        bifurcacoes += (obter_linha(tab, row + 1),)
+        bifurcacoes += (obter_coluna(tab, col + 1),)
+
+        return bifurcacoes
+
     possiveis = ()
 
     for pos in range(1, 10):
         if not eh_posicao_livre(tab, pos):
             continue
-        biforcacoes = obter_bifurcacoes(tab, pos)
+        bifurcacoes = obter_bifurcacoes(tab, pos)
 
         count = 0
-        for bifurcacao in biforcacoes:
+        for bifurcacao in bifurcacoes:
             # linha/coluna/diagonal apenas tem uma entrada do 'jogador'
             # e o resto vazio.
             # se tivesse duas entradas, a regra da vitoria impedia de chegar
@@ -515,8 +546,8 @@ def escolher_canto_oposto(tab, jogador):
         diagonal = obter_diagonal(tab, diag + 1)
         for canto in (0, 2):
             if diagonal[canto] == 0 and diagonal[2 - canto] == -jogador:
-                possiveis += converter_pos_relativa_absoluto(
-                    canto, 'diagonal', diag)
+                possiveis += (converter_pos_relativa_absoluto(
+                    canto, 'diagonal', diag),)
 
     return possiveis
 
