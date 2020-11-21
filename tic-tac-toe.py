@@ -94,17 +94,17 @@ def eh_jogador_str(jogador):
     return jogador in ('X', 'O')
 
 
-def eh_dificuldade(dificuldade):
+def eh_estrategia(estrategia):
     """
     Recebe um argumento de qualquer tipo e retorna True ou False,
-    consoante esse argumento corresponda a uma dificuldade do jogo,
+    consoante esse argumento corresponda a uma estrategia do jogo,
     isto eh, seja uma string igual a 'basico', 'normal' ou 'perfeito'.
 
-    eh_dificuldade: universal -> booleano
+    eh_estrategia: universal -> booleano
     """
-    if not isinstance(dificuldade, str):
+    if not isinstance(estrategia, str):
         return False
-    return dificuldade in ('basico', 'normal', 'perfeito')
+    return estrategia in ('basico', 'normal', 'perfeito')
 
 
 def obter_coluna(tab, col):
@@ -626,7 +626,7 @@ def escolher_lateral(tab, jogador):
 # (Acabar) Estrategias de jogar auto
 
 
-def escolher_posicao_auto(tab, jogador, dificuldade):
+def escolher_posicao_auto(tab, jogador, estrategia):
     """
     Recebe um tabuleiro, um inteiro identificando um jogador e uma cadeia
     de caracteres correspondente ah estrategia, e devolve a posicao escolhida
@@ -636,7 +636,7 @@ def escolher_posicao_auto(tab, jogador, dificuldade):
     """
     if not eh_tabuleiro(tab) or \
             not eh_jogador(jogador) or \
-            not eh_dificuldade(dificuldade):
+            not eh_estrategia(estrategia):
         raise ValueError(
             'escolher_posicao_auto: algum dos argumentos e invalido')
 
@@ -649,9 +649,9 @@ def escolher_posicao_auto(tab, jogador, dificuldade):
                  escolher_canto,
                  escolher_lateral)
 
-    if dificuldade == 'basico':
+    if estrategia == 'basico':
         criterios = tuple(criterios[i] for i in (4, 6, 7))
-    if dificuldade == 'normal':
+    if estrategia == 'normal':
         criterios = tuple(criterios[i] for i in (0, 1, 4, 5, 6, 7))
     # se perfeito, manter
 
@@ -664,31 +664,37 @@ def escolher_posicao_auto(tab, jogador, dificuldade):
     raise ValueError('escolher_posicao_auto: tabuleiro cheio')
 
 
-def jogo_do_galo(jogador, dificuldade):
+def jogo_do_galo(jogador, estrategia):
+    """
+    Corresponde ah funcao principal que permite jogar um jogo do galo
+    completo de um jogador contra o computador.
+    O jogo comeca sempre com o jogador 'X', e acaba quando um dos jogadores
+    vence ou se nao existirem posicoes livres no tabuleiro.
+    Recebe uma cadeia de caracteres que representa a marca do jogador
+    humano ('X' ou 'O'), e outra cadeia de caracteres que representa a
+    estrategia a adotar pela maquina.
+    Devolve uma cadeira de caracteres correspondente ao jogador ganhador, ou
+    em caso de empate, 'EMPATE'.
 
-    def jogador_str_para_int(jogador):
-        if jogador == 'O':
-            return -1
-        return 1
-
-    if not eh_jogador_str(jogador) or not eh_dificuldade(dificuldade):
+    jogo_do_galo -> cad. caracteres X cad. caracteres -> cad. caracteres
+    """
+    if not eh_jogador_str(jogador) or not eh_estrategia(estrategia):
         raise ValueError('jogo_do_galo: algum dos argumentos e invalido')
 
     print('Bem-vindo ao JOGO DO GALO.')
     print("O jogador joga com '{}'.".format(jogador))
 
-    humano = jogador_str_para_int(jogador)
     jogador_atual = 1
 
-    tab = ((0, 0, 0), (0, 0, 0), (0, 0, 0))
+    tab = ((0, 0, 0), (0, 0, 0), (0, 0, 0))  # tabuleiro inicial
 
     while (jogador_ganhador(tab) == 0 and len(obter_posicoes_livres(tab)) > 0):
-        if jogador_atual == humano:
+        if jogador_str(jogador_atual) == jogador:
             pos_escolhida = escolher_posicao_manual(tab)
         else:
             pos_escolhida = escolher_posicao_auto(
-                tab, jogador_atual, dificuldade)
-            print('Turno do computador ({}):'.format(dificuldade))
+                tab, jogador_atual, estrategia)
+            print('Turno do computador ({}):'.format(estrategia))
         tab = marcar_posicao(tab, jogador_atual, pos_escolhida)
         print(tabuleiro_str(tab))
 
