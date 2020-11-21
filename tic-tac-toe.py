@@ -8,6 +8,7 @@ def eh_tabuleiro(tab):
 
     eh_tabuleiro: universal -> booleano
     """
+
     if not isinstance(tab, tuple) or len(tab) != 3:
         return False
     for linha in tab:
@@ -22,11 +23,12 @@ def eh_tabuleiro(tab):
 
 def eh_inteiro_entre(valor, minimo, maximo):
     """
-    Funcao auxiliar que retorna True se o valor for um inteiro
+    Funcao auxiliar que retorna True se 'valor' for um inteiro
     entre min e max (inclusive)
 
     eh_inteiro_entre: universal X N X N -> booleano
     """
+
     # Usar type em vez de isinstance para filtrar boleanos
     if type(valor) != int:
         return False
@@ -41,7 +43,7 @@ def eh_posicao(pos):
 
     eh_posicao: universal -> booleano
     """
-    # Usar type em vez de isinstance para filtrar boleanos
+
     return eh_inteiro_entre(pos, 1, 9)
 
 
@@ -53,7 +55,7 @@ def eh_coluna_ou_linha(pos):
 
     eh_coluna_ou_linha: universal -> booleano
     """
-    # Usar type em vez de isinstance para filtrar boleanos
+
     return eh_inteiro_entre(pos, 1, 3)
 
 
@@ -65,7 +67,7 @@ def eh_diagonal(pos):
 
     eh_diagonal: universal -> booleano
     """
-    # Usar type em vez de isinstance para filtrar boleanos
+
     return eh_inteiro_entre(pos, 1, 2)
 
 
@@ -77,6 +79,7 @@ def eh_jogador(jogador):
 
     eh_jogador: universal -> booleano
     """
+
     # zero nao eh um jogador valido
     return eh_inteiro_entre(jogador, -1, 1) and jogador != 0
 
@@ -85,10 +88,11 @@ def eh_jogador_str(jogador):
     """
     Recebe um argumento de qualquer tipo e retorna True ou False,
     consoante esse argumento corresponda a uma string que representa
-    um jogador, isto eh, O ou X.
+    um jogador, isto eh, 'O' ou 'X'.
 
     eh_jogador_str: universal -> booleano
     """
+
     if not isinstance(jogador, str):
         return False
     return jogador in ('X', 'O')
@@ -102,6 +106,7 @@ def eh_estrategia(estrategia):
 
     eh_estrategia: universal -> booleano
     """
+
     if not isinstance(estrategia, str):
         return False
     return estrategia in ('basico', 'normal', 'perfeito')
@@ -110,11 +115,12 @@ def eh_estrategia(estrategia):
 def obter_coluna(tab, col):
     """
     Recebe um tabuleiro e uma posicao (inteiro) de uma coluna, e
-    retorna o vetor que representa essa coluna.
-    Levanta um ValueError caso algum dos arugmentos seja invalido.
+    retorna o vetor (tuplo) que representa essa coluna.
+    Levanta um ValueError caso algum dos argumentos seja invalido.
 
     obter_coluna: tabuleiro X inteiro -> vetor
     """
+
     if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(col):
         raise ValueError('obter_coluna: algum dos argumentos e invalido')
 
@@ -125,10 +131,11 @@ def obter_linha(tab, linha):
     """
     Recebe um tabuleiro e uma posicao (inteiro) de uma linha, e
     retorna o vetor que representa essa linha.
-    Levanta um ValueError caso algum dos arugmentos seja invalido.
+    Levanta um ValueError caso algum dos argumentos seja invalido.
 
     obter_linha: tabuleiro X inteiro -> vetor
     """
+
     if not eh_tabuleiro(tab) or not eh_coluna_ou_linha(linha):
         raise ValueError('obter_linha: algum dos argumentos e invalido')
 
@@ -139,10 +146,11 @@ def obter_diagonal(tab, diag):
     """
     Recebe um tabuleiro e uma posicao (inteiro) de uma diagonal, e
     retorna o vetor que representa essa diagonal.
-    Levanta um ValueError caso algum dos arugmentos seja invalido.
+    Levanta um ValueError caso algum dos argumentos seja invalido.
 
     obter_diagonal: tabuleiro X inteiro -> vetor
     """
+
     if not eh_tabuleiro(tab) or not eh_diagonal(diag):
         raise ValueError('obter_diagonal: algum dos argumentos e invalido')
 
@@ -160,6 +168,7 @@ def jogador_str(jogador):
 
     cell_str: jogador -> string
     """
+
     if jogador == -1:
         return 'O'
     if jogador == 1:
@@ -170,7 +179,8 @@ def jogador_str(jogador):
 def tabuleiro_str(tab):
     """
     Recebe um tabuleiro e retorna a cadeia de caracteres que o
-    representa graficamente
+    representa graficamente.
+    Levanta um ValueError caso o argumento seja invalido.
 
     tabuleiro_str: tabuleiro -> cad. caracteres
     """
@@ -179,19 +189,20 @@ def tabuleiro_str(tab):
         raise ValueError('tabuleiro_str: o argumento e invalido')
 
     return '\n-----------\n'.join([
-        '|'.join([
-            ' ' + jogador_str(tab[linha][col]) + ' '
-            for col in range(3)])
+        ' {} | {} | {} '.format(
+            *[jogador_str(tab[linha][col]) for col in range(3)])
         for linha in range(3)])
 
 
 def pos_humana_maquina(pos):
     """
     Funcao auxiliar que converte uma posicao humana (e.g. 1, 4, 9)
-    numa posicao maquina (e.g. (0,0), (1, 0), (2, 2))
+    numa posicao maquina (e.g. (0,0), (1, 0), (2, 2)).
+    Levanta um ValueError caso o argumento seja invalido.
 
     pos_humana_maquina: posicao -> tuplo
     """
+
     if not eh_posicao(pos):
         raise ValueError('pos_humana_maquina: o argumento e invalido')
 
@@ -204,9 +215,11 @@ def pos_maquina_humana(linha, col):
     Funcao auxiliar que converte uma posicao maquina
     (e.g. (0,0), (1, 0), (2, 2)) numa posicao humana (e.g. 1, 4, 9).
     As linhas e as colunas sao contadas a partir de zero.
+    Levanta um ValueError caso algum dos argumentos seja invalido.
 
     pos_maquina_humana: linha X coluna -> posicao
     """
+
     if not type(linha) == int or \
             not type(col) == int or \
             not eh_coluna_ou_linha(linha + 1) or \
@@ -221,9 +234,11 @@ def eh_posicao_livre(tab, pos):
     Recebe um tabuleiro e uma posicao e devolve True se a posicao
     correspondente no tabuleiro estiver livre.
     Devolve False caso contrario.
+    Levanta um ValueError caso algum dos argumentos seja invalido.
 
     eh_posicao_livre: tabuleiro X posicao -> booleano
     """
+
     if not eh_tabuleiro(tab) or not eh_posicao(pos):
         raise ValueError('eh_posicao_livre: algum dos argumentos e invalido')
 
@@ -235,9 +250,11 @@ def obter_posicoes_livres(tab):
     """
     Recebe um tabuleiro e devolve o vetor ordenado com todas as posicoes
     livres do tabuleiro.
+    Levanta um ValueError caso o argumento seja invalido.
 
     obter_posicoes_livres: tabuleiro -> vetor
     """
+
     if not eh_tabuleiro(tab):
         raise ValueError('obter_posicoes_livres: o argumento e invalido')
 
@@ -248,6 +265,7 @@ def jogador_ganhador(tab):
     """
     Recebe um tabuleiro e retorna o jogador vencedor (-1 ou 1).
     Se nao houver nenhum jogador que ganhou, retorna zero.
+    Levanta um ValueError caso o argumento seja invalido.
 
     jogador_ganhador: tabuleiro -> inteiro
     """
@@ -264,15 +282,16 @@ def jogador_ganhador(tab):
                    (obter_diagonal, 2))
 
         # i vai ate 3 na linha ou coluna e ate 2 na diagonal
-        # executa a funcao adequada dependendo se eh linha, coluna ou diag
-        return tuple(seccao[0](tab, i + 1)
-                     for seccao in seccoes
-                     for i in range(seccao[1]))
+        # executa a funcao adequada dependendo se eh linha, coluna ou diagonal
+        return tuple(obter_seccao(tab, i + 1)
+                     for obter_seccao, iteracoes in seccoes
+                     for i in range(iteracoes))
 
     def eh_tuplo_completo(tup):
         """
         Recebe uma linha/coluna/diagonal e retorna True se todos os valores
         do tuplo forem iguais.
+        Levanta um ValueError caso o argumento seja invalido.
 
         eh_tuplo_completo: linha/coluna/diagonal -> booleano
         """
@@ -299,17 +318,18 @@ def marcar_posicao(tab, jogador, pos):
     Recebe um tabuleiro, um inteiro identificando um jogador e uma posicao
     livre, e devolve um novo tabuleiro modificado com uma nova marca
     do jogador nessa posicao.
+    Levanta um ValueError caso algum dos argumentos seja invalido.
 
     marcar_posicao: tabuleiro X jogador X posicao -> tabuleiro
     """
 
-    if not eh_tabuleiro(tab) or not eh_jogador(jogador) or not eh_posicao(pos):
+    if not eh_tabuleiro(tab) or \
+            not eh_jogador(jogador) or \
+            not eh_posicao(pos) or \
+            not eh_posicao_livre(tab, pos):
         raise ValueError('marcar_posicao: algum dos argumentos e invalido')
 
     linha, coluna = pos_humana_maquina(pos)
-
-    if tab[linha][coluna] != 0:
-        raise ValueError('marcar_posicao: algum dos argumentos e invalido')
 
     linha_tuplo = tab[linha]
     nova_linha = linha_tuplo[:coluna] + (jogador, ) + linha_tuplo[coluna + 1:]
@@ -321,9 +341,11 @@ def escolher_posicao_manual(tab):
     """
     Recebe um tabuleiro e realiza a leitura de uma posicao introduzida
     manualmente por um jogador e devolve esta posicao escolhida.
+    Levanta um ValueError caso o argumento seja invalido.
 
     escolher_posicao_manual: tabuleiro -> posicao
     """
+
     if not eh_tabuleiro(tab):
         raise ValueError('escolher_posicao_manual: o argumento e invalido')
 
@@ -385,7 +407,7 @@ def converter_pos_relativa_absoluto(pos, tipo, i):
     """
     Recebe uma posicao relativa (0 a 2) e converte-a
     para a posicao absoluta do tabuleiro (1 a 9) consoante
-    se eh linha, coluna ou diagonal
+    se eh linha, coluna ou diagonal, e a posicao da seccao (i).
 
     converter_pos_relativa_absoluto:
         posicao relativa X cad. caracteres X inteiro -> posicao absoluta
@@ -405,9 +427,9 @@ def converter_pos_relativa_absoluto(pos, tipo, i):
 
 def converter_seccao_relativa_absoluto(seccao, tipo, i):
     """
-    Recebe uma seccao de indices relativos (0 a 2) e converte
+    Recebe uma seccao de indices relativos (0 a 2) e converte-a
     para as posicoes absolutas do tabuleiro (1 a 9) consoante
-    se eh linha, coluna ou diagonal
+    se eh linha, coluna ou diagonal, e a posicao da seccao (i).
 
     converter_seccao_relativa_absoluto:
         tuplo X cad. caracteres X inteiro -> tuplo
@@ -427,19 +449,19 @@ def obter_entradas_no_tuplo(entradas, tuplo):
     return tuple(el for el in entradas if el in tuplo)
 
 
-# Estrategias de jogar auto
-#
-# Todas as funcoes retornam um tuplo com as posicoes em que a estrategia
-# eh valida
-
-def escolher_vitoria(tab, jogador):
+def obter_posicoes_que(func_criterio, tab, jogador):
     """
-    Recebe um tabuleiro e um jogador e retorna um tuplo nao ordenado
-    com as posicoes em que o criterio 1 (vitoria) eh valido.
+    Funcao auxiliar que recebe uma funcao criterio, um tabuleiro e um
+    inteiro que representa um jogadro (-1 ou 1) e retorna um tuplo
+    com a juncao de todos os tuplos retornados pela funcao criterio.
 
-    escolher_vitoria: tabuleiro X jogador -> tuplo posicoes
+    A funcao criterio recebe um tuplo de posicoes (absolutas) livres numa
+    seccao e retorna um tuplo das posicoes (absolutas) que correspondem
+    ao criterio a aplicar.
+
+    obter_posicoes_que: funcao X tabuleiro X inteiro -> tuplo posicoes
     """
-    possiveis = ()
+    resultado = ()
 
     seccoes = (('linha', obter_linha, 3),
                ('coluna', obter_coluna, 3),
@@ -450,11 +472,29 @@ def escolher_vitoria(tab, jogador):
             vazios_rel = escolher_vazios(seccao, jogador)
             vazios_abs = converter_seccao_relativa_absoluto(
                 vazios_rel, tipo, i)
-            # se a seccao soh tiver uma posicao livre, escolher essa posicao
-            if len(vazios_abs) == 1:
-                possiveis += vazios_abs
 
-    return possiveis
+            resultado += func_criterio(vazios_abs)
+
+    return resultado
+
+# Estrategias de jogar auto
+#
+# Todas as funcoes retornam um tuplo nao ordenado com as posicoes
+# em que a estrategia eh valida
+
+
+def escolher_vitoria(tab, jogador):
+    """
+    Recebe um tabuleiro e um jogador e retorna um tuplo nao ordenado
+    com as posicoes em que o criterio 1 (vitoria) eh valido.
+
+    escolher_vitoria: tabuleiro X jogador -> tuplo posicoes
+    """
+
+    return obter_posicoes_que(
+        # se a seccao soh tiver uma posicao livre, escolher essa posicao
+        lambda vazios_abs: vazios_abs if len(vazios_abs) == 1 else (),
+        tab, jogador)
 
 
 def escolher_bloqueio(tab, jogador):
@@ -541,29 +581,29 @@ def escolher_bloqueio_bifurcacao(tab, jogador):
     if len(bifurcacoes) <= 1:
         return bifurcacoes
 
-    possiveis = ()
+    def func_criterio_bloq_bifurcacao(vazios_abs):
+        """
+        Funcao auxiliar que recebe um tuplo de posicoes vazias
+        e devolve em que posicao(oes) o jogador deve jogar para
+        bloquear uma bifurcacao.
+        Esta funcao eh para ser usada como funcao criterio na
+        funcao obter_posicoes_que.
 
-    seccoes = (('linha', obter_linha, 3),
-               ('coluna', obter_coluna, 3),
-               ('diagonal', obter_diagonal, 2))
-    for tipo, obter_seccao, iteracoes in seccoes:
-        for i in range(iteracoes):
-            seccao = obter_seccao(tab, i + 1)
-            vazios_rel = escolher_vazios(seccao, jogador)
-            vazios_abs = converter_seccao_relativa_absoluto(
-                vazios_rel, tipo, i)
-            if len(vazios_abs) == 2:
-                vazios_bifurcacao = obter_entradas_no_tuplo(
-                    vazios_abs, bifurcacoes)
-                if len(vazios_bifurcacao) == 0:
-                    # qualquer uma das posicoes eh segura
-                    possiveis += vazios_abs
-                elif len(vazios_bifurcacao) == 1:
-                    # apenas uma das posicoes nao dah a vitoria ao oponente
-                    # logo, jogar nessa posicao
-                    possiveis += vazios_bifurcacao
+        func_criterio_bloq_bifurcacao: tuplo posicoes -> tuplo posicoes
+        """
+        if len(vazios_abs) == 2:
+            vazios_bifurcacao = obter_entradas_no_tuplo(
+                vazios_abs, bifurcacoes)
+            if len(vazios_bifurcacao) == 0:
+                # qualquer uma das posicoes eh segura
+                return vazios_abs
+            elif len(vazios_bifurcacao) == 1:
+                # apenas uma das posicoes nao dah a vitoria ao oponente
+                # logo, jogar nessa posicao
+                return vazios_bifurcacao
+        return ()
 
-    return possiveis
+    return obter_posicoes_que(func_criterio_bloq_bifurcacao, tab, jogador)
 
 
 def escolher_centro(tab, jogador):
