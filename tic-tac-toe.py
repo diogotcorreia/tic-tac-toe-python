@@ -434,8 +434,8 @@ def obter_entradas_no_tuplo(entradas, tuplo):
 
 def escolher_vitoria(tab, jogador):
     """
-    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
-    em que a estrategia 1 (vitoria) eh valida.
+    Recebe um tabuleiro e um jogador e retorna um tuplo nao ordenado
+    com as posicoes em que o criterio 1 (vitoria) eh valido.
 
     escolher_vitoria: tabuleiro X jogador -> tuplo posicoes
     """
@@ -459,8 +459,8 @@ def escolher_vitoria(tab, jogador):
 
 def escolher_bloqueio(tab, jogador):
     """
-    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
-    em que a estrategia 2 (bloqueio) eh valida.
+    Recebe um tabuleiro e um jogador e retorna um tuplo nao ordenado
+    com as posicoes em que o criterio 2 (bloqueio) eh valido.
 
     escolher_bloqueio: tabuleiro X jogador -> tuplo posicoes
     """
@@ -471,8 +471,8 @@ def escolher_bloqueio(tab, jogador):
 
 def escolher_bifurcacao(tab, jogador):
     """
-    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
-    em que a estrategia 3 (bifurcacao) eh valida.
+    Recebe um tabuleiro e um jogador e retorna um tuplo nao ordenado
+    com as posicoes em que o criterio 3 (bifurcacao) eh valido.
 
     escolher_bifurcacao: tabuleiro X jogador -> tuplo posicoes
     """
@@ -526,8 +526,8 @@ def escolher_bifurcacao(tab, jogador):
 
 def escolher_bloqueio_bifurcacao(tab, jogador):
     """
-    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
-    em que a estrategia 4 (bloqueio de bifurcacao) eh valida.
+    Recebe um tabuleiro e um jogador e retorna um tuplo nao ordenado
+    com as posicoes em que o criterio 4 (bloqueio de bifurcacao) eh valido.
 
     escolher_bloqueio_bifurcacao: tabuleiro X jogador -> tuplo posicoes
     """
@@ -568,8 +568,8 @@ def escolher_bloqueio_bifurcacao(tab, jogador):
 
 def escolher_centro(tab, jogador):
     """
-    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
-    em que a estrategia 5 (centro) eh valida.
+    Recebe um tabuleiro e um jogador e retorna um tuplo nao ordenado
+    com as posicoes em que o criterio 5 (centro) eh valido.
 
     escolher_centro: tabuleiro X jogador -> tuplo posicoes
     """
@@ -581,8 +581,8 @@ def escolher_centro(tab, jogador):
 
 def escolher_canto_oposto(tab, jogador):
     """
-    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
-    em que a estrategia 6 (canto oposto) eh valida.
+    Recebe um tabuleiro e um jogador e retorna um tuplo nao ordenado
+    com as posicoes em que o criterio 6 (canto oposto) eh valido.
 
     escolher_canto_oposto: tabuleiro X jogador -> tuplo posicoes
     """
@@ -602,8 +602,8 @@ def escolher_canto_oposto(tab, jogador):
 
 def escolher_canto(tab, jogador):
     """
-    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
-    em que a estrategia 7 (canto vazio) eh valida.
+    Recebe um tabuleiro e um jogador e retorna um tuplo nao ordenado
+    com as posicoes em que o criterio 7 (canto vazio) eh valido.
 
     escolher_canto: tabuleiro X jogador -> tuplo posicoes
     """
@@ -614,8 +614,8 @@ def escolher_canto(tab, jogador):
 
 def escolher_lateral(tab, jogador):
     """
-    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
-    em que a estrategia 8 (lateral vazio) eh valida.
+    Recebe um tabuleiro e um jogador e retorna um tuplo nao ordenado
+    com as posicoes em que o criterio 8 (lateral vazio) eh valido.
 
     escolher_lateral: tabuleiro X jogador -> tuplo posicoes
     """
@@ -627,22 +627,38 @@ def escolher_lateral(tab, jogador):
 
 
 def escolher_posicao_auto(tab, jogador, dificuldade):
-    if not eh_tabuleiro(tab) or not eh_jogador(jogador) or not eh_dificuldade(dificuldade):
+    """
+    Recebe um tabuleiro, um inteiro identificando um jogador e uma cadeia
+    de caracteres correspondente ah estrategia, e devolve a posicao escolhida
+    automaticamente de acordo com a estrategia selecionada.
+
+    escolher_posicao_auto: tabuleiro X inteiro X cad. caracteres -> posicao
+    """
+    if not eh_tabuleiro(tab) or \
+            not eh_jogador(jogador) or \
+            not eh_dificuldade(dificuldade):
         raise ValueError(
             'escolher_posicao_auto: algum dos argumentos e invalido')
 
-    if dificuldade == 'basico':
-        estrategias = (escolher_centro, escolher_canto, escolher_lateral)
-    if dificuldade == 'normal':
-        estrategias = (escolher_vitoria, escolher_bloqueio, escolher_centro,
-                       escolher_canto_oposto, escolher_canto, escolher_lateral)
-    if dificuldade == 'perfeito':
-        estrategias = (escolher_vitoria, escolher_bloqueio, escolher_bifurcacao, escolher_bloqueio_bifurcacao,
-                       escolher_centro, escolher_canto_oposto, escolher_canto, escolher_lateral)
+    criterios = (escolher_vitoria,
+                 escolher_bloqueio,
+                 escolher_bifurcacao,
+                 escolher_bloqueio_bifurcacao,
+                 escolher_centro,
+                 escolher_canto_oposto,
+                 escolher_canto,
+                 escolher_lateral)
 
-    for estrategia in estrategias:
-        pos = estrategia(tab, jogador)
+    if dificuldade == 'basico':
+        criterios = tuple(criterios[i] for i in (4, 6, 7))
+    if dificuldade == 'normal':
+        criterios = tuple(criterios[i] for i in (0, 1, 4, 5, 6, 7))
+    # se perfeito, manter
+
+    for criterio in criterios:
+        pos = criterio(tab, jogador)
         if len(pos) != 0:
+            # retornar primeira posicao valida
             return sorted(pos)[0]
 
     raise ValueError('escolher_posicao_auto: tabuleiro cheio')
