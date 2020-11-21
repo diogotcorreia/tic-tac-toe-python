@@ -452,7 +452,7 @@ def obter_entradas_no_tuplo(entradas, tuplo):
 def obter_posicoes_que(func_criterio, tab, jogador):
     """
     Funcao auxiliar que recebe uma funcao criterio, um tabuleiro e um
-    inteiro que representa um jogadro (-1 ou 1) e retorna um tuplo
+    inteiro que representa um jogador (-1 ou 1) e retorna um tuplo
     com a juncao de todos os tuplos retornados pela funcao criterio.
 
     A funcao criterio recebe um tuplo de posicoes (absolutas) livres numa
@@ -517,25 +517,25 @@ def escolher_bifurcacao(tab, jogador):
     escolher_bifurcacao: tabuleiro X jogador -> tuplo posicoes
     """
 
-    def obter_bifurcacoes(tab, pos):
+    def obter_possiveis_bifurcacoes(tab, pos):
         """
-        Recebe um tabuleiro e uma posicao, e retorna todas as bifurcacoes
-        nessa posicao, quer sejam linhas, colunas ou diagonais.
+        Recebe um tabuleiro e uma posicao, e retorna todas as possiveis 
+        bifurcacoes nessa posicao, quer sejam linhas, colunas ou diagonais.
 
-        obter_bifurcacoes: tabuleiro X posicao -> tuplo de seccoes
+        obter_possiveis_bifurcacoes: tabuleiro X posicao -> tuplo de seccoes
         """
         bifurcacoes = ()
 
-        (row, col) = pos_humana_maquina(pos)
+        linha, col = pos_humana_maquina(pos)
 
         # diagonal 1 (posicoes 1, 5 e 9)
-        if row == col:
+        if linha == col:
             bifurcacoes += (obter_diagonal(tab, 1),)
         # diagonal 2 (posicoes 3, 5 e 7)
-        elif 2 - row == col:
+        elif 2 - linha == col:
             bifurcacoes += (obter_diagonal(tab, 2), )
 
-        bifurcacoes += (obter_linha(tab, row + 1),)
+        bifurcacoes += (obter_linha(tab, linha + 1),)
         bifurcacoes += (obter_coluna(tab, col + 1),)
 
         return bifurcacoes
@@ -545,20 +545,20 @@ def escolher_bifurcacao(tab, jogador):
     for pos in range(1, 10):
         if not eh_posicao_livre(tab, pos):
             continue
-        bifurcacoes = obter_bifurcacoes(tab, pos)
+        bifurcacoes = obter_possiveis_bifurcacoes(tab, pos)
 
-        count = 0
+        qnt = 0
         for seccao in bifurcacoes:
             # linha/coluna/diagonal apenas tem uma entrada do 'jogador'
             # e o resto vazio.
             # se tivesse duas entradas, a regra da vitoria impedia de chegar
             # ah bifurcacao
             if jogador in seccao and -jogador not in seccao:
-                count += 1
+                qnt += 1
 
         # se o numero de seccoes soh com uma peca do jogador for
         # igual ou maior que 2, ha uma bifurcacao nessa posicao
-        if count >= 2:
+        if qnt >= 2:
             possiveis += (pos, )
 
     return possiveis
@@ -585,7 +585,8 @@ def escolher_bloqueio_bifurcacao(tab, jogador):
         """
         Funcao auxiliar que recebe um tuplo de posicoes vazias
         e devolve em que posicao(oes) o jogador deve jogar para
-        bloquear uma bifurcacao.
+        bloquear uma bifurcacao. Devolve um tuplo vazio se o jogador
+        nao dever jogar em nenhuma das posicoes.
         Esta funcao eh para ser usada como funcao criterio na
         funcao obter_posicoes_que.
 
@@ -614,9 +615,7 @@ def escolher_centro(tab, jogador):
     escolher_centro: tabuleiro X jogador -> tuplo posicoes
     """
 
-    if tab[1][1] == 0:
-        return (5,)
-    return ()
+    return (5, ) if tab[1][1] == 0 else ()
 
 
 def escolher_canto_oposto(tab, jogador):
@@ -671,6 +670,7 @@ def escolher_posicao_auto(tab, jogador, estrategia):
     Recebe um tabuleiro, um inteiro identificando um jogador e uma cadeia
     de caracteres correspondente ah estrategia, e devolve a posicao escolhida
     automaticamente de acordo com a estrategia selecionada.
+    Levanta um ValueError caso algum dos argumentos seja invalido.
 
     escolher_posicao_auto: tabuleiro X inteiro X cad. caracteres -> posicao
     """
@@ -715,6 +715,7 @@ def jogo_do_galo(jogador, estrategia):
     estrategia a adotar pela maquina.
     Devolve uma cadeira de caracteres correspondente ao jogador ganhador, ou
     em caso de empate, 'EMPATE'.
+    Levanta um ValueError caso algum dos argumentos seja invalido.
 
     jogo_do_galo -> cad. caracteres X cad. caracteres -> cad. caracteres
     """
