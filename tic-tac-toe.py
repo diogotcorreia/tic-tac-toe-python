@@ -428,14 +428,21 @@ def obter_entradas_no_tuplo(entradas, tuplo):
 
 
 # Estrategias de jogar auto
+#
+# Todas as funcoes retornam um tuplo com as posicoes em que a estrategia
+# eh valida
 
 def escolher_vitoria(tab, jogador):
     """
-    Edge case: duas posicoes possiveis, retornar a menor de acordo com a fig
+    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
+    em que a estrategia 1 (vitoria) eh valida.
+
+    escolher_vitoria: tabuleiro X jogador -> tuplo posicoes
     """
     possiveis = ()
 
-    seccoes = (('linha', obter_linha, 3), ('coluna', obter_coluna, 3),
+    seccoes = (('linha', obter_linha, 3),
+               ('coluna', obter_coluna, 3),
                ('diagonal', obter_diagonal, 2))
     for tipo, obter_seccao, iteracoes in seccoes:
         for i in range(iteracoes):
@@ -443,6 +450,7 @@ def escolher_vitoria(tab, jogador):
             vazios_rel = escolher_vazios(seccao, jogador)
             vazios_abs = converter_seccao_relativa_absoluto(
                 vazios_rel, tipo, i)
+            # se a seccao soh tiver uma posicao livre, escolher essa posicao
             if len(vazios_abs) == 1:
                 possiveis += vazios_abs
 
@@ -450,11 +458,25 @@ def escolher_vitoria(tab, jogador):
 
 
 def escolher_bloqueio(tab, jogador):
+    """
+    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
+    em que a estrategia 2 (bloqueio) eh valida.
+
+    escolher_bloqueio: tabuleiro X jogador -> tuplo posicoes
+    """
+
     # escolher_bloqueio eh o escolher_vitoria para o jogador contrario
     return escolher_vitoria(tab, -jogador)
 
 
 def escolher_bifurcacao(tab, jogador):
+    """
+    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
+    em que a estrategia 3 (bifurcacao) eh valida.
+
+    escolher_bifurcacao: tabuleiro X jogador -> tuplo posicoes
+    """
+
     def obter_bifurcacoes(tab, pos):
         """
         Recebe um tabuleiro e uma posicao, e retorna todas as bifurcacoes
@@ -470,7 +492,7 @@ def escolher_bifurcacao(tab, jogador):
         if row == col:
             bifurcacoes += (obter_diagonal(tab, 1),)
         # diagonal 2 (posicoes 3, 5 e 7)
-        elif abs(2 - row) == col:
+        elif 2 - row == col:
             bifurcacoes += (obter_diagonal(tab, 2), )
 
         bifurcacoes += (obter_linha(tab, row + 1),)
@@ -486,14 +508,16 @@ def escolher_bifurcacao(tab, jogador):
         bifurcacoes = obter_bifurcacoes(tab, pos)
 
         count = 0
-        for bifurcacao in bifurcacoes:
+        for seccao in bifurcacoes:
             # linha/coluna/diagonal apenas tem uma entrada do 'jogador'
             # e o resto vazio.
             # se tivesse duas entradas, a regra da vitoria impedia de chegar
             # ah bifurcacao
-            if jogador in bifurcacao and -jogador not in bifurcacao:
+            if jogador in seccao and -jogador not in seccao:
                 count += 1
 
+        # se o numero de seccoes soh com uma peca do jogador for
+        # igual ou maior que 2, ha uma bifurcacao nessa posicao
         if count >= 2:
             possiveis += (pos, )
 
@@ -501,6 +525,13 @@ def escolher_bifurcacao(tab, jogador):
 
 
 def escolher_bloqueio_bifurcacao(tab, jogador):
+    """
+    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
+    em que a estrategia 4 (bloqueio de bifurcacao) eh valida.
+
+    escolher_bloqueio_bifurcacao: tabuleiro X jogador -> tuplo posicoes
+    """
+
     # Obter todas as bifurcacoes
     bifurcacoes = escolher_bifurcacao(tab, -jogador)
 
@@ -512,7 +543,8 @@ def escolher_bloqueio_bifurcacao(tab, jogador):
 
     possiveis = ()
 
-    seccoes = (('linha', obter_linha, 3), ('coluna', obter_coluna, 3),
+    seccoes = (('linha', obter_linha, 3),
+               ('coluna', obter_coluna, 3),
                ('diagonal', obter_diagonal, 2))
     for tipo, obter_seccao, iteracoes in seccoes:
         for i in range(iteracoes):
@@ -528,36 +560,66 @@ def escolher_bloqueio_bifurcacao(tab, jogador):
                     possiveis += vazios_abs
                 elif len(vazios_bifurcacao) == 1:
                     # apenas uma das posicoes nao dah a vitoria ao oponente
+                    # logo, jogar nessa posicao
                     possiveis += vazios_bifurcacao
 
     return possiveis
 
 
 def escolher_centro(tab, jogador):
+    """
+    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
+    em que a estrategia 5 (centro) eh valida.
+
+    escolher_centro: tabuleiro X jogador -> tuplo posicoes
+    """
+
     if tab[1][1] == 0:
         return (5,)
     return ()
 
 
 def escolher_canto_oposto(tab, jogador):
+    """
+    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
+    em que a estrategia 6 (canto oposto) eh valida.
+
+    escolher_canto_oposto: tabuleiro X jogador -> tuplo posicoes
+    """
+
     possiveis = ()
 
-    for diag in range(2):
-        diagonal = obter_diagonal(tab, diag + 1)
-        for canto in (0, 2):
-            if diagonal[canto] == 0 and diagonal[2 - canto] == -jogador:
-                possiveis += (converter_pos_relativa_absoluto(
-                    canto, 'diagonal', diag),)
+    for indice_diag in range(2):
+        diagonal = obter_diagonal(tab, indice_diag + 1)
+        possiveis += tuple(
+            converter_pos_relativa_absoluto(canto, 'diagonal', indice_diag)
+            for canto in (0, 2)
+            if diagonal[canto] == 0 and diagonal[2 - canto] == -jogador
+        )
 
     return possiveis
 
 
 def escolher_canto(tab, jogador):
+    """
+    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
+    em que a estrategia 7 (canto vazio) eh valida.
+
+    escolher_canto: tabuleiro X jogador -> tuplo posicoes
+    """
+
     cantos = (1, 3, 7, 9)
     return escolher_lista(tab, cantos)
 
 
 def escolher_lateral(tab, jogador):
+    """
+    Recebe um tabuleiro e um jogador e retorna um tuplo com as posicoes
+    em que a estrategia 8 (lateral vazio) eh valida.
+
+    escolher_lateral: tabuleiro X jogador -> tuplo posicoes
+    """
+
     laterais = (2, 4, 6, 8)
     return escolher_lista(tab, laterais)
 
